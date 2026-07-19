@@ -153,6 +153,31 @@ body::after {
   }
 }
 
+/* Sticky Mobile Sync Controller Bar */
+.mobile-sync-controller {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-sync-controller {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 90;
+    background: rgba(28, 35, 33, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(209, 232, 226, 0.25);
+    padding: 10px 12px;
+    margin-top: 12px;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.6);
+  }
+}
+
 /* Header */
 .app-header {
   height: 64px;

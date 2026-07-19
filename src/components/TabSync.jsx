@@ -1525,6 +1525,78 @@ export default function TabSync({
               </div>
             </>
           )}
+
+          {/* Sticky Mobile Touch Sync Controller Bar */}
+          <div className="mobile-sync-controller">
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', width: '100%' }}>
+              
+              {/* Primary Big STAMP (S) Button */}
+              <button 
+                type="button"
+                className="btn btn-primary" 
+                onClick={handleSync}
+                style={{
+                  flex: '2 1 0',
+                  padding: '12px 8px',
+                  fontSize: '13px',
+                  fontWeight: '800',
+                  background: 'var(--accent-gradient)',
+                  boxShadow: '0 4px 15px var(--accent-glow)',
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  border: 'none'
+                }}
+              >
+                <CheckCircle size={16} />
+                <span>STAMP [S]</span>
+              </button>
+
+              {/* PLAY / PAUSE Button */}
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={togglePlay}
+                style={{ flex: '1 1 0', padding: '12px 6px', fontSize: '11px', fontWeight: '700', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              >
+                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+              </button>
+
+              {/* UNDO (Z) Button */}
+              <button 
+                type="button"
+                className="btn btn-secondary" 
+                onClick={handleUndo}
+                style={{ flex: '1 1 0', padding: '12px 6px', fontSize: '11px', fontWeight: '700', borderRadius: '10px', color: '#FFCB9A', border: '1px solid rgba(255, 203, 154, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              >
+                <RotateCcw size={14} />
+                <span>UNDO [Z]</span>
+              </button>
+
+            </div>
+
+            {/* Secondary Shortcuts Row (Break M, Mark End E, Skip D, Loop A/B) */}
+            <div style={{ display: 'flex', gap: '4px', width: '100%', overflowX: 'auto', paddingTop: '2px' }}>
+              <button type="button" className="btn btn-secondary" onClick={handleInsertMusicBreak} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                🎵 BREAK [M]
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={handleMarkEnd} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                ⏹️ END [E]
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={handleSkip} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                ⏭️ SKIP [D]
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => setLoopStart(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                🚩 SET A
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={() => setLoopEnd(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                🏁 SET B
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Player Controls & Settings */}
@@ -1912,11 +1984,14 @@ export default function TabSync({
           animation: 'fadeIn 0.25s ease-out'
         }}>
           <div className="glass-card" style={{
-            width: '480px',
-            padding: '28px',
+            width: '94%',
+            maxWidth: '480px',
+            maxHeight: '85vh',
+            overflowY: 'auto',
+            padding: '20px 18px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '18px',
+            gap: '14px',
             boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(17, 100, 102, 0.2)',
             border: '1px solid rgba(209, 232, 226, 0.22)',
             borderRadius: '16px',

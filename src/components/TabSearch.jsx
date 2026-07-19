@@ -723,8 +723,9 @@ export default function TabSearch({
                   className="form-control"
                   style={{ 
                     flexGrow: 1,
-                    minHeight: '220px',
-                    height: '240px',
+                    minHeight: '140px',
+                    height: '200px',
+                    maxHeight: '220px',
                     resize: 'none', 
                     fontFamily: 'inherit',
                     lineHeight: '1.6',
@@ -737,7 +738,7 @@ export default function TabSearch({
                 />
               </div>
 
-              <div className="flex-between" style={{ borderTop: '1px solid var(--border-light)', paddingTop: '12px', marginTop: '4px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-light)', paddingTop: '12px', marginTop: '4px' }}>
                 <button 
                   type="button" 
                   className="btn btn-secondary" 
@@ -754,12 +755,12 @@ export default function TabSearch({
                   <Sparkles size={11} /> Clean Brackets
                 </button>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flexGrow: 1, justifyContent: 'flex-end' }}>
                   <button 
                     type="button" 
                     className="btn btn-secondary" 
                     onClick={handleSaveLyrics}
-                    style={{ fontSize: '11px', padding: '6px 12px' }}
+                    style={{ fontSize: '11px', padding: '6px 12px', flex: '1 1 auto' }}
                   >
                     Apply
                   </button>
@@ -774,7 +775,7 @@ export default function TabSearch({
                         onNextTab();
                       }
                     }}
-                    style={{ fontSize: '11px', padding: '6px 12px', border: '1px solid #FFCB9A', color: '#FFCB9A' }}
+                    style={{ fontSize: '11px', padding: '6px 12px', border: '1px solid #FFCB9A', color: '#FFCB9A', flex: '1 1 auto' }}
                     disabled={!pastedLyrics.trim()}
                   >
                     Proceed to Retimer ⏱️
@@ -790,10 +791,10 @@ export default function TabSearch({
                         alert("Make sure you have BOTH loaded a track AND applied lyrics to proceed!");
                       }
                     }}
-                    style={{ fontSize: '11px', padding: '6px 14px', background: 'var(--accent-gradient)', boxShadow: '0 2px 10px var(--accent-glow)' }}
+                    style={{ fontSize: '11px', padding: '6px 14px', background: 'var(--accent-gradient)', border: 'none', boxShadow: '0 2px 10px var(--accent-glow)', flex: '1 1 auto' }}
                     disabled={!currentTrack || !pastedLyrics.trim()}
                   >
-                    Proceed to Sync
+                    Proceed to Sync <ArrowRight size={12} style={{ marginLeft: '4px' }} />
                   </button>
                 </div>
               </div>

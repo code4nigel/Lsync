@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, SkipForward, Settings, HelpCircle, ChevronUp, ChevronDown, Trash2, Repeat, RefreshCw, Info } from 'lucide-react';
+import { Play, Pause, RotateCcw, SkipForward, Settings, HelpCircle, ChevronUp, ChevronDown, Trash2, Repeat, RefreshCw, Info, CheckCircle } from 'lucide-react';
 import { parseLrcText, formatSyncDataToLrc, formatLrcTime } from '../utils/lrcParser';
 
 export default function TabSync({

@@ -78,3 +78,9 @@ Lsync integrates with open web APIs and local media engines:
 ### 👤 Author & Credits
 
 Crafted with ❤️ by **NigelWeb** ([github.com/code4nigel](https://github.com/code4nigel)), Lead Architect of **Lsync** & **Scrobby**.
+
+---
+
+### 📜 License
+
+This project is licensed under the **GNU General Public License v3.0 (GPL-3.0)** — see the [LICENSE](LICENSE) file for full details.

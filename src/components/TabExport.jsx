@@ -56,7 +56,13 @@ export default function TabExport({
       return JSON.stringify(jsonStructure, null, 2);
     } else if (format === 'txt') {
       let txtHeader = (includeMetadata && currentTrack) ? `Title: ${currentTrack.title}\nArtist: ${currentTrack.artist}\n-----------------------------------\n\n` : '';
-      return txtHeader + syncData.map(line => line.text).join('\n');
+      if (granularity === 'plain') {
+        return txtHeader + syncData.map(line => line.text).join('\n');
+      } else if (granularity === 'line') {
+        return txtHeader + formatSyncDataToLrc(syncData, currentTrack, { includeMetadata: false, syncMode: 'line' });
+      } else {
+        return txtHeader + formatSyncDataToLrc(syncData, currentTrack, { includeMetadata: false, syncMode: 'word' });
+      }
     } else if (format === 'doc') {
       let docHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${currentTrack?.title || 'Lyrics'}</title><style>body{font-family:Arial,sans-serif;margin:40px;line-height:1.6;}h1{color:#116466;margin-bottom:4px;}h3{color:#666;margin-top:0;}p{font-size:14px;margin:6px 0;}</style></head><body>`;
       if (includeMetadata && currentTrack) {
@@ -89,7 +95,7 @@ export default function TabExport({
     const ext = exportFormat === 'lrc' ? 'lrc' : exportFormat === 'json' ? 'json' : exportFormat === 'txt' ? 'txt' : 'doc';
     const mime = exportFormat === 'doc' ? 'application/msword;charset=utf-8' : 'text/plain;charset=utf-8';
     const cleanTitle = (currentTrack?.title || 'synced-lyrics').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const suffix = (exportFormat === 'lrc' || exportFormat === 'json') ? (selectedGranularity === 'word' ? '-wbw' : '-lbl') : '';
+    const suffix = (exportFormat === 'lrc' || exportFormat === 'json' || exportFormat === 'txt') ? `-${selectedGranularity}` : '';
     const filename = `${cleanTitle}${suffix}.${ext}`;
     
     const blob = new Blob([exportText], { type: mime });
@@ -116,8 +122,26 @@ export default function TabExport({
             </h3>
             
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              {(exportFormat === 'lrc' || exportFormat === 'json') && (
+              {/* Granularity Pills for LRC, JSON, and TXT */}
+              {(exportFormat === 'lrc' || exportFormat === 'json' || exportFormat === 'txt') && (
                 <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '16px', overflow: 'hidden', padding: '1px', background: 'rgba(0,0,0,0.2)' }}>
+                  {exportFormat === 'txt' && (
+                    <button 
+                      className="btn" 
+                      onClick={() => { playUiSound('click'); setSelectedGranularity('plain'); }}
+                      style={{ 
+                        borderRadius: '14px',
+                        padding: '2px 8px',
+                        fontSize: '9px',
+                        fontWeight: '700',
+                        background: selectedGranularity === 'plain' ? 'var(--accent-gradient)' : 'transparent',
+                        color: '#fff',
+                        border: 'none'
+                      }}
+                    >
+                      Plain
+                    </button>
+                  )}
                   <button 
                     className="btn" 
                     onClick={() => { playUiSound('click'); setSelectedGranularity('line'); }}

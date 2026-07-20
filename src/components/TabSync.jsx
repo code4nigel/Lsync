@@ -123,13 +123,28 @@ export default function TabSync({
     });
   };
 
-  // Interactive Tour Modal States
+  // Interactive Tour Modal States (Session Persistence)
   const [showTutorial, setShowTutorial] = useState(() => {
-    return localStorage.getItem('lsync_skip_tutorial') !== 'true';
+    return sessionStorage.getItem('lsync_session_tutorial_dismissed') !== 'true';
   });
-  const [dontShowAgain, setDontShowAgain] = useState(() => {
-    return localStorage.getItem('lsync_skip_tutorial') === 'true';
-  });
+
+  const syncOptionsRef = useRef(null);
+  const prevScrollPosRef = useRef(0);
+  const [isViewingSyncOptions, setIsViewingSyncOptions] = useState(false);
+
+  const handleToggleSyncOptionsScroll = () => {
+    playUiSound('click');
+    if (!isViewingSyncOptions) {
+      prevScrollPosRef.current = window.scrollY || document.documentElement.scrollTop;
+      if (syncOptionsRef.current) {
+        syncOptionsRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+      setIsViewingSyncOptions(true);
+    } else {
+      window.scrollTo({ top: prevScrollPosRef.current, behavior: 'smooth' });
+      setIsViewingSyncOptions(false);
+    }
+  };
 
   // A-B Looping states
   const [loopStart, setLoopStart] = useState(0);
@@ -1470,13 +1485,14 @@ export default function TabSync({
                 })}
               </div>
 
-              {/* Unified Ergonomic Sync Controller Bar (Desktop & Mobile) */}
-              <div className="sync-controller-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--border-light)' }}>
+              {/* Unified Ergonomic Sync Controller Bar (Desktop & Mobile - Hidden when Guide Modal is open) */}
+              {!showTutorial && (
+                <div className="sync-controller-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--border-light)' }}>
                 {workspaceTab === 'sync' ? (
                   <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
                       
-                      {/* LEFT THUMB / CONTROL WING: PLAY/PAUSE & UNDO [Z] */}
+                      {/* LEFT THUMB / CONTROL WING: PLAY/PAUSE & BREAK [M] (PINK) */}
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button 
                           type="button"
@@ -1503,6 +1519,33 @@ export default function TabSync({
                         <button 
                           type="button"
                           className="btn btn-secondary" 
+                          onClick={handleInsertMusicBreak}
+                          style={{
+                            flex: '1 1 0',
+                            height: '48px',
+                            fontSize: '10px',
+                            fontWeight: '800',
+                            borderRadius: '12px',
+                            color: '#F472B6',
+                            border: '1px solid rgba(244, 114, 182, 0.4)',
+                            background: 'rgba(244, 114, 182, 0.15)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            boxShadow: '0 2px 10px rgba(244, 114, 182, 0.2)'
+                          }}
+                        >
+                          <Music size={15} />
+                          <span>BREAK [M]</span>
+                        </button>
+                      </div>
+
+                      {/* RIGHT THUMB / CONTROL WING: UNDO [Z] & STAMP [S] */}
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button 
+                          type="button"
+                          className="btn btn-secondary" 
                           onClick={handleUndo}
                           style={{
                             flex: '1 1 0',
@@ -1521,32 +1564,6 @@ export default function TabSync({
                         >
                           <RotateCcw size={15} />
                           <span>UNDO [Z]</span>
-                        </button>
-                      </div>
-
-                      {/* RIGHT THUMB / CONTROL WING: BREAK [M] & STAMP [S] */}
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <button 
-                          type="button"
-                          className="btn btn-secondary" 
-                          onClick={handleInsertMusicBreak}
-                          style={{
-                            flex: '1 1 0',
-                            height: '48px',
-                            fontSize: '10px',
-                            fontWeight: '800',
-                            borderRadius: '12px',
-                            color: '#D1E8E2',
-                            border: '1px solid var(--border-light)',
-                            background: 'rgba(209, 232, 226, 0.12)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <Music size={15} />
-                          <span>BREAK [M]</span>
                         </button>
 
                         <button 
@@ -1575,7 +1592,7 @@ export default function TabSync({
 
                     </div>
 
-                    {/* Bottom Quick Actions Row: END [E], SKIP [D], SET A, SET B */}
+                    {/* Bottom Quick Actions Row: END [E], SKIP [D], LOOP, OPTIONS */}
                     <div style={{ display: 'flex', gap: '4px', width: '100%', overflowX: 'auto', paddingTop: '2px' }}>
                       <button type="button" className="btn btn-secondary" onClick={handleMarkEnd} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
                         ⏹️ END [E]
@@ -1583,11 +1600,42 @@ export default function TabSync({
                       <button type="button" className="btn btn-secondary" onClick={handleSkip} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
                         ⏭️ SKIP [D]
                       </button>
-                      <button type="button" className="btn btn-secondary" onClick={() => setLoopStart(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                        🚩 SET A
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary" 
+                        onClick={() => {
+                          playUiSound('click');
+                          setLoopEnabled(prev => !prev);
+                        }} 
+                        style={{ 
+                          flex: '1 0 auto', 
+                          padding: '6px 8px', 
+                          fontSize: '10px', 
+                          fontWeight: '700', 
+                          whiteSpace: 'nowrap',
+                          background: loopEnabled ? 'rgba(17, 100, 102, 0.4)' : 'rgba(255,255,255,0.03)',
+                          border: loopEnabled ? '1px solid var(--accent-blue)' : '1px solid var(--border-light)',
+                          color: loopEnabled ? '#fff' : 'var(--text-sub)'
+                        }}
+                      >
+                        🔁 LOOP {loopEnabled ? '(ON)' : '(OFF)'}
                       </button>
-                      <button type="button" className="btn btn-secondary" onClick={() => setLoopEnd(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                        🏁 SET B
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary" 
+                        onClick={handleToggleSyncOptionsScroll} 
+                        style={{ 
+                          flex: '1 0 auto', 
+                          padding: '6px 8px', 
+                          fontSize: '10px', 
+                          fontWeight: '700', 
+                          whiteSpace: 'nowrap',
+                          background: isViewingSyncOptions ? 'rgba(255, 203, 154, 0.25)' : 'rgba(255,255,255,0.03)',
+                          border: isViewingSyncOptions ? '1px solid #FFCB9A' : '1px solid var(--border-light)',
+                          color: isViewingSyncOptions ? '#FFCB9A' : 'var(--text-sub)'
+                        }}
+                      >
+                        ⚙️ OPTIONS {isViewingSyncOptions ? '↑' : '↓'}
                       </button>
                     </div>
                   </>
@@ -1609,6 +1657,7 @@ export default function TabSync({
                   </button>
                 )}
               </div>
+              )}
             </>
           )}
 
@@ -1787,7 +1836,7 @@ export default function TabSync({
           )}
 
           {/* Combined Settings Panel (Options vs Keyboard Shortcuts Pill Switcher) */}
-          <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="glass-card" ref={syncOptionsRef} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             
             {/* Pill Switcher in Header */}
             <div className="flex-between" style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '12px' }}>
@@ -2231,50 +2280,18 @@ export default function TabSync({
               </div>
             </div>
 
-            <div className="flex-between" style={{ borderTop: '1px solid var(--border-light)', paddingTop: '16px', marginTop: '4px' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-sub)', cursor: 'pointer' }}>
-                <input 
-                  type="checkbox" 
-                  checked={dontShowAgain}
-                  onChange={(e) => {
-                    setDontShowAgain(e.target.checked);
-                    if (e.target.checked) {
-                      localStorage.setItem('lsync_skip_tutorial', 'true');
-                    } else {
-                      localStorage.removeItem('lsync_skip_tutorial');
-                    }
-                  }}
-                  style={{ accentColor: '#116466', cursor: 'pointer' }}
-                />
-                Don't show this quick tour again
-              </label>
-
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button 
-                  className="btn btn-secondary" 
-                  style={{ padding: '6px 12px', fontSize: '11px' }}
-                  onClick={() => {
-                    if (dontShowAgain) {
-                      localStorage.setItem('lsync_skip_tutorial', 'true');
-                    }
-                    setShowTutorial(false);
-                  }}
-                >
-                  Skip
-                </button>
-                <button 
-                  className="btn btn-primary" 
-                  style={{ padding: '6px 16px', fontSize: '11px', background: 'var(--accent-gradient)', boxShadow: '0 2px 8px var(--accent-glow)' }}
-                  onClick={() => {
-                    if (dontShowAgain) {
-                      localStorage.setItem('lsync_skip_tutorial', 'true');
-                    }
-                    setShowTutorial(false);
-                  }}
-                >
-                  Got it, let's sync!
-                </button>
-              </div>
+            <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '16px', marginTop: '4px', display: 'flex', justifyContent: 'center' }}>
+              <button 
+                className="btn btn-primary" 
+                style={{ width: '100%', padding: '10px', fontSize: '13px', background: 'var(--accent-gradient)', fontWeight: '800', borderRadius: '12px', boxShadow: '0 4px 15px var(--accent-glow)' }}
+                onClick={() => {
+                  playUiSound('modal');
+                  sessionStorage.setItem('lsync_session_tutorial_dismissed', 'true');
+                  setShowTutorial(false);
+                }}
+              >
+                Okay, let's sync!
+              </button>
             </div>
           </div>
         </div>

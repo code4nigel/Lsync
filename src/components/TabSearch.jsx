@@ -830,15 +830,19 @@ export default function TabSearch({
                   onClick={() => {
                     playUiSound('modal');
                     const cleaned = pastedLyrics
+                      .replace(/^\[(ti|ar|al|au|by|offset|re|ve):.*\]$/gmi, '')
+                      .replace(/\[\d+:\d+(?:\.\d+)?\]/g, '')
+                      .replace(/<\d+:\d+(?:\.\d+)?>/g, '')
+                      .replace(/^\s*♪\s*$/gm, '')
                       .split('\n')
-                      .filter(line => !line.trim().startsWith('[') && !line.trim().endsWith(']'))
-                      .join('\n')
-                      .replace(/\n{2,}/g, '\n\n');
+                      .map(l => l.trim())
+                      .filter(Boolean)
+                      .join('\n');
                     setPastedLyrics(cleaned);
                   }}
-                  style={{ fontSize: '10px', padding: '6px 10px' }}
+                  style={{ fontSize: '10px', padding: '6px 10px', fontWeight: '700' }}
                 >
-                  <Sparkles size={11} /> Clean Brackets
+                  <Sparkles size={11} /> Clean Timestamps & Tags
                 </button>
 
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flexGrow: 1, justifyContent: 'flex-end' }}>

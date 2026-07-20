@@ -126,7 +126,7 @@ body::after {
     box-sizing: border-box !important;
   }
   .app-body, .app-content {
-    padding: 12px 12px 90px 12px !important;
+    padding: 12px 12px 400px 12px !important;
     zoom: 1 !important; /* Reset desktop 1.1x zoom multiplier on mobile */
     overflow-x: hidden !important;
     width: 100% !important;
@@ -138,6 +138,7 @@ body::after {
     box-sizing: border-box !important;
     overflow-x: hidden !important;
     margin: 0 !important;
+    padding-bottom: 350px !important;
   }
   .app-header {
     height: auto;

@@ -33,7 +33,9 @@ export default function App() {
   });
 
   const [lyricsFontSize, setLyricsFontSize] = useState(() => {
-    return parseInt(localStorage.getItem('lsync_lyrics_font_size') || '28');
+    const saved = localStorage.getItem('lsync_lyrics_font_size');
+    if (saved) return parseInt(saved);
+    return window.innerWidth <= 768 ? 22 : 28;
   });
 
   const [bgTheme, setBgTheme] = useState(() => {

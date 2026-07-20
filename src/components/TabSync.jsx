@@ -135,13 +135,18 @@ export default function TabSync({
   const handleToggleSyncOptionsScroll = () => {
     playUiSound('click');
     if (!isViewingSyncOptions) {
-      prevScrollPosRef.current = window.scrollY || document.documentElement.scrollTop;
+      const currentPos = window.scrollY || document.documentElement.scrollTop || 0;
+      prevScrollPosRef.current = currentPos;
       if (syncOptionsRef.current) {
         syncOptionsRef.current.scrollIntoView({ behavior: 'smooth' });
       }
       setIsViewingSyncOptions(true);
     } else {
-      window.scrollTo({ top: prevScrollPosRef.current, behavior: 'smooth' });
+      const targetPos = prevScrollPosRef.current > 0 ? prevScrollPosRef.current : 0;
+      window.scrollTo({ top: targetPos, behavior: 'smooth' });
+      if (listContainerRef.current) {
+        listContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       setIsViewingSyncOptions(false);
     }
   };
@@ -1968,6 +1973,53 @@ export default function TabSync({
                         onClick={() => changeSpeed(spd)}
                       >
                         {spd}x
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Lyrics Font Size with Reset Button */}
+                <div className="form-group" style={{ marginBottom: '0' }}>
+                  <div className="flex-between" style={{ marginBottom: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lyrics Font Size</label>
+                      <button 
+                        type="button"
+                        onClick={() => setLyricsFontSize(window.innerWidth <= 768 ? 22 : 28)}
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '4px',
+                          padding: '1px 6px',
+                          fontSize: '9px',
+                          color: '#fff',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A' }}>{lyricsFontSize}px</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="14" 
+                    max="48" 
+                    step="1" 
+                    value={lyricsFontSize}
+                    onChange={(e) => setLyricsFontSize(parseInt(e.target.value))}
+                    style={{ width: '100%', height: '4px', accentColor: '#116466', cursor: 'pointer' }}
+                  />
+                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px', overflowX: 'auto' }}>
+                    {[18, 22, 28, 34, 40].map((sz) => (
+                      <button 
+                        key={sz}
+                        type="button" 
+                        className="btn btn-secondary"
+                        style={{ flex: 1, padding: '3px', fontSize: '9px', fontWeight: '600', background: lyricsFontSize === sz ? 'var(--accent-gradient)' : 'rgba(0,0,0,0.2)' }}
+                        onClick={() => setLyricsFontSize(sz)}
+                      >
+                        {sz}px
                       </button>
                     ))}
                   </div>

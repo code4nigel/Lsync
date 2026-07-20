@@ -1573,7 +1573,7 @@ export default function TabSync({
                           <button 
                             type="button"
                             className="btn btn-secondary" 
-                            onClick={() => handleStampWordOrLine()}
+                            onClick={handleSync}
                             style={{
                               flex: '1 1 0',
                               height: '48px',

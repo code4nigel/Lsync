@@ -884,6 +884,17 @@ export default function TabSync({
     }
   };
 
+  // Auto-scroll active line to vertical center during sync
+  useEffect(() => {
+    if (activeLineRef.current) {
+      activeLineRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest'
+      });
+    }
+  }, [activeLineIndex, activeWordIndex, workspaceTab]);
+
   return (
     <div className="tab-pane active" style={{ display: 'flex', flexDirection: 'column', gap: '20px', height: '100%', position: 'relative' }}>
       
@@ -1460,7 +1471,7 @@ export default function TabSync({
               </div>
 
               {/* Unified Ergonomic Sync Controller Bar (Desktop & Mobile) */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--border-light)' }}>
+              <div className="sync-controller-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--border-light)' }}>
                 {workspaceTab === 'sync' ? (
                   <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>

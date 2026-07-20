@@ -531,29 +531,53 @@ export default function TabSearch({
                 </form>
               </div>
 
-              {/* Custom Details Form (if video lookup fails) */}
+              {/* Custom Details Form (Confirm / Edit Title & Artist) */}
               {showCustomDetailsForm && (
-                <form onSubmit={handleCustomDetailsSubmit} style={{ padding: '12px', background: 'rgba(255,255,255,0.02)', border: '1px dashed var(--border-light)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.25s ease' }}>
-                  <span style={{ fontSize: '10px', color: 'var(--accent-blue)', fontWeight: '700' }}>Confirm Video Details</span>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <input 
-                      type="text" 
-                      placeholder="Song Title" 
-                      value={customTitle} 
-                      onChange={(e) => setCustomTitle(e.target.value)} 
-                      className="form-control"
-                      style={{ padding: '6px 10px', fontSize: '11px', borderRadius: '8px' }}
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="Artist Name" 
-                      value={customArtist} 
-                      onChange={(e) => setCustomArtist(e.target.value)} 
-                      className="form-control"
-                      style={{ padding: '6px 10px', fontSize: '11px', borderRadius: '8px' }}
-                    />
+                <form onSubmit={handleCustomDetailsSubmit} style={{ padding: '12px', background: 'rgba(17, 100, 102, 0.12)', border: '1px solid rgba(209, 232, 226, 0.25)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px', animation: 'fadeIn 0.25s ease' }}>
+                  <div className="flex-between">
+                    <span style={{ fontSize: '10px', color: '#FFCB9A', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Confirm Track Details</span>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        playUiSound('click');
+                        const temp = customTitle;
+                        setCustomTitle(customArtist);
+                        setCustomArtist(temp);
+                      }} 
+                      style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '4px', padding: '2px 6px', fontSize: '9px', color: '#D1E8E2', cursor: 'pointer', fontWeight: '700' }}
+                    >
+                      ⇄ Swap Title & Artist
+                    </button>
                   </div>
-                  <button type="submit" className="btn btn-primary" onClick={() => playUiSound('modal')} style={{ padding: '6px', fontSize: '11px', background: 'var(--accent-gradient)' }}>Load Track</button>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div>
+                      <label style={{ fontSize: '9px', fontWeight: '700', color: '#D1E8E2', display: 'block', marginBottom: '3px' }}>🎵 SONG TITLE</label>
+                      <input 
+                        type="text" 
+                        placeholder="Song Title" 
+                        value={customTitle} 
+                        onChange={(e) => setCustomTitle(e.target.value)} 
+                        className="form-control"
+                        style={{ padding: '6px 10px', fontSize: '11px', borderRadius: '8px' }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '9px', fontWeight: '700', color: '#D1E8E2', display: 'block', marginBottom: '3px' }}>🎤 ARTIST NAME</label>
+                      <input 
+                        type="text" 
+                        placeholder="Artist Name" 
+                        value={customArtist} 
+                        onChange={(e) => setCustomArtist(e.target.value)} 
+                        className="form-control"
+                        style={{ padding: '6px 10px', fontSize: '11px', borderRadius: '8px' }}
+                      />
+                    </div>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary" onClick={() => playUiSound('modal')} style={{ padding: '6px', fontSize: '11px', background: 'var(--accent-gradient)', fontWeight: '700' }}>
+                    Load Track
+                  </button>
                 </form>
               )}
 
@@ -817,28 +841,18 @@ export default function TabSearch({
                   <Sparkles size={11} /> Clean Brackets
                 </button>
 
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flexGrow: 1, justifyContent: 'flex-end' }}>
-                  <button 
-                    type="button" 
-                    className="btn" 
-                    onClick={() => { playUiSound('modal'); handleSaveLyrics(); }}
-                    style={{ 
-                      fontSize: '11px', 
-                      padding: '6px 14px', 
-                      flex: '1 1 auto', 
-                      background: 'linear-gradient(135deg, #FFCB9A 0%, #D1E8E2 100%)', 
-                      color: '#1C2321', 
-                      borderRadius: '16px', 
-                      fontWeight: '800',
-                      boxShadow: '0 2px 10px rgba(255, 203, 154, 0.4)',
-                      border: 'none'
-                    }}
-                  >
-                    Edit or Add LRC
-                  </button>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', flexGrow: 1, justifyContent: 'flex-end' }}>
                   <button 
                     type="button" 
                     className="btn btn-secondary" 
+                    onClick={() => { playUiSound('modal'); handleSaveLyrics(); }}
+                    style={{ fontSize: '11px', padding: '6px 12px', flex: '1 1 auto', fontWeight: '700' }}
+                  >
+                    Save Lyrics
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn" 
                     onClick={() => {
                       playUiSound('modal');
                       handleSaveLyrics();
@@ -848,14 +862,24 @@ export default function TabSearch({
                         onNextTab();
                       }
                     }}
-                    style={{ fontSize: '11px', padding: '6px 12px', border: '1px solid #FFCB9A', color: '#FFCB9A', flex: '1 1 auto' }}
+                    style={{ 
+                      fontSize: '11px', 
+                      padding: '6px 14px', 
+                      flex: '1 1 auto', 
+                      background: 'linear-gradient(135deg, #FFCB9A 0%, #D9B08C 100%)', 
+                      color: '#1C2321', 
+                      borderRadius: '18px', 
+                      fontWeight: '800',
+                      boxShadow: '0 3px 12px rgba(255, 203, 154, 0.35)',
+                      border: 'none'
+                    }}
                     disabled={!pastedLyrics.trim()}
                   >
                     Proceed to Retimer ⏱️
                   </button>
                   <button 
                     type="button" 
-                    className="btn btn-primary" 
+                    className="btn" 
                     onClick={() => {
                       playUiSound('modal');
                       handleSaveLyrics();
@@ -865,10 +889,20 @@ export default function TabSearch({
                         alert("Make sure you have BOTH loaded a track AND applied lyrics to proceed!");
                       }
                     }}
-                    style={{ fontSize: '11px', padding: '6px 14px', background: 'var(--accent-gradient)', border: 'none', boxShadow: '0 2px 10px var(--accent-glow)', flex: '1 1 auto' }}
+                    style={{ 
+                      fontSize: '11px', 
+                      padding: '6px 16px', 
+                      flex: '1 1 auto', 
+                      background: 'linear-gradient(135deg, #116466 0%, #D1E8E2 100%)', 
+                      color: '#1C2321', 
+                      borderRadius: '18px', 
+                      fontWeight: '800',
+                      boxShadow: '0 3px 12px rgba(209, 232, 226, 0.4)',
+                      border: 'none'
+                    }}
                     disabled={!currentTrack || !pastedLyrics.trim()}
                   >
-                    Proceed to Sync <ArrowRight size={12} style={{ marginLeft: '4px' }} />
+                    Proceed to Sync <ArrowRight size={13} style={{ marginLeft: '4px' }} />
                   </button>
                 </div>
               </div>

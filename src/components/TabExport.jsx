@@ -26,15 +26,16 @@ export default function TabExport({
     window.open(url, '_blank');
   };
 
-  // Helper to generate content string for specific mode
+  // Helper to generate content string for specific mode and format
   const getContentForMode = (granularity, format) => {
     if (!syncData || syncData.length === 0) return '';
+
     if (format === 'lrc') {
       return formatSyncDataToLrc(syncData, currentTrack, {
         includeMetadata: includeMetadata,
         syncMode: granularity
       });
-    } else {
+    } else if (format === 'json') {
       const jsonStructure = {
         title: currentTrack?.title || 'Unknown Title',
         artist: currentTrack?.artist || 'Unknown Artist',
@@ -53,7 +54,19 @@ export default function TabExport({
         }))
       };
       return JSON.stringify(jsonStructure, null, 2);
+    } else if (format === 'txt') {
+      let txtHeader = (includeMetadata && currentTrack) ? `Title: ${currentTrack.title}\nArtist: ${currentTrack.artist}\n-----------------------------------\n\n` : '';
+      return txtHeader + syncData.map(line => line.text).join('\n');
+    } else if (format === 'doc') {
+      let docHtml = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${currentTrack?.title || 'Lyrics'}</title><style>body{font-family:Arial,sans-serif;margin:40px;line-height:1.6;}h1{color:#116466;margin-bottom:4px;}h3{color:#666;margin-top:0;}p{font-size:14px;margin:6px 0;}</style></head><body>`;
+      if (includeMetadata && currentTrack) {
+        docHtml += `<h1>${currentTrack.title}</h1><h3>Artist: ${currentTrack.artist}</h3><hr style="border:none;border-top:1px solid #ccc;margin:16px 0;"/>`;
+      }
+      docHtml += syncData.map(line => `<p>${line.text || '&nbsp;'}</p>`).join('');
+      docHtml += `</body></html>`;
+      return docHtml;
     }
+    return '';
   };
 
   // Update exportText when format or granularity changes
@@ -61,33 +74,25 @@ export default function TabExport({
     setExportText(getContentForMode(selectedGranularity, exportFormat));
   }, [syncData, selectedGranularity, exportFormat, includeMetadata, currentTrack]);
 
-  // Copy specific mode
-  const handleCopySpecific = (granularity) => {
+  // Copy current code
+  const handleCopyCurrent = () => {
     playUiSound('modal');
-    const text = getContentForMode(granularity, exportFormat);
-    navigator.clipboard.writeText(text).then(() => {
-      if (granularity === 'line') {
-        setCopiedLbl(true);
-        setTimeout(() => setCopiedLbl(false), 2000);
-      } else {
-        setCopiedWbw(true);
-        setTimeout(() => setCopiedWbw(false), 2000);
-      }
+    navigator.clipboard.writeText(exportText).then(() => {
+      setCopiedLbl(true);
+      setTimeout(() => setCopiedLbl(false), 2000);
     });
   };
 
-  // Download specific mode
-  const handleDownloadSpecific = (granularity) => {
+  // Download current file
+  const handleDownloadCurrent = () => {
     playUiSound('modal');
-    const text = getContentForMode(granularity, exportFormat);
-    const fileExtension = exportFormat === 'lrc' ? 'lrc' : 'json';
-    const cleanTitle = (currentTrack?.title || 'synced-lyrics')
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-');
-    const suffix = granularity === 'word' ? '-wbw' : '-lbl';
-    const filename = `${cleanTitle}${suffix}.${fileExtension}`;
+    const ext = exportFormat === 'lrc' ? 'lrc' : exportFormat === 'json' ? 'json' : exportFormat === 'txt' ? 'txt' : 'doc';
+    const mime = exportFormat === 'doc' ? 'application/msword;charset=utf-8' : 'text/plain;charset=utf-8';
+    const cleanTitle = (currentTrack?.title || 'synced-lyrics').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const suffix = (exportFormat === 'lrc' || exportFormat === 'json') ? (selectedGranularity === 'word' ? '-wbw' : '-lbl') : '';
+    const filename = `${cleanTitle}${suffix}.${ext}`;
     
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([exportText], { type: mime });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -105,74 +110,33 @@ export default function TabExport({
         
         {/* Left Column: Preview Textbox */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '560px' }}>
-          <div className="flex-between">
+          <div className="flex-between" style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
             <h3 style={{ fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}>
-              <FileText size={18} style={{ color: 'var(--accent-purple)' }} /> Generated Sync Code
+              <FileText size={18} style={{ color: 'var(--accent-purple)' }} /> Generated Export Code
             </h3>
             
-            {/* Format & Granularity Switcher Pills */}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {exportFormat === 'lrc' && (
-                <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden', background: 'rgba(0,0,0,0.2)' }}>
-                  <button 
-                    className="btn" 
-                    onClick={() => setSelectedGranularity('line')}
-                    style={{ 
-                      borderRadius: 0,
-                      padding: '4px 8px',
-                      fontSize: '10px',
-                      fontWeight: '700',
-                      background: selectedGranularity === 'line' ? 'var(--accent-gradient)' : 'transparent',
-                      color: '#fff'
-                    }}
-                  >
-                    Line-by-Line (LbL)
-                  </button>
-                  <button 
-                    className="btn" 
-                    onClick={() => setSelectedGranularity('word')}
-                    style={{ 
-                      borderRadius: 0,
-                      padding: '4px 8px',
-                      fontSize: '10px',
-                      fontWeight: '700',
-                      background: selectedGranularity === 'word' ? 'var(--accent-gradient)' : 'transparent',
-                      color: '#fff'
-                    }}
-                  >
-                    Word-by-Word (WbW)
-                  </button>
-                </div>
-              )}
-
-              <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '8px', overflow: 'hidden' }}>
+            {/* Format Selector Pills */}
+            <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '20px', overflow: 'hidden', padding: '2px', background: 'rgba(0,0,0,0.2)' }}>
+              {['lrc', 'json', 'txt', 'doc'].map((fmt) => (
                 <button 
+                  key={fmt}
                   className="btn" 
-                  onClick={() => setExportFormat('lrc')}
+                  onClick={() => { playUiSound('click'); setExportFormat(fmt); }}
                   style={{ 
-                    borderRadius: 0,
-                    padding: '4px 10px',
+                    borderRadius: '16px',
+                    padding: '3px 10px',
                     fontSize: '10px',
-                    background: exportFormat === 'lrc' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-                    color: exportFormat === 'lrc' ? '#fff' : 'var(--text-sub)'
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    background: exportFormat === fmt ? 'var(--accent-gradient)' : 'transparent',
+                    color: '#fff',
+                    border: 'none',
+                    boxShadow: exportFormat === fmt ? '0 2px 8px var(--accent-glow)' : 'none'
                   }}
                 >
-                  LRC
+                  {fmt === 'doc' ? 'DOCS' : fmt}
                 </button>
-                <button 
-                  className="btn" 
-                  onClick={() => setExportFormat('json')}
-                  style={{ 
-                    borderRadius: 0,
-                    padding: '4px 10px',
-                    fontSize: '10px',
-                    background: exportFormat === 'json' ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-                    color: exportFormat === 'json' ? '#fff' : 'var(--text-sub)'
-                  }}
-                >
-                  JSON
-                </button>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -186,7 +150,7 @@ export default function TabExport({
               fontSize: '12px',
               lineHeight: '1.6',
               background: '#040406',
-              color: 'var(--accent-purple)',
+              color: exportFormat === 'doc' ? '#D1E8E2' : 'var(--accent-purple)',
               borderColor: 'var(--border-light)',
               padding: '16px',
               resize: 'none'
@@ -194,53 +158,26 @@ export default function TabExport({
             value={exportText}
           />
 
-          {/* Dual Copy & Download Actions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn btn-secondary" style={{ flex: 1, padding: '8px', fontSize: '11px' }} onClick={() => handleCopySpecific('line')}>
-                {copiedLbl ? (
-                  <>
-                    <CheckCircle size={14} style={{ color: 'var(--green)' }} />
-                    <span>Copied LbL!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={14} />
-                    <span>Copy LbL (Line-by-Line)</span>
-                  </>
-                )}
-              </button>
+          {/* Unified Copy & Download Action Bar */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button className="btn btn-secondary" style={{ flex: 1, padding: '10px', fontSize: '11px', fontWeight: '700' }} onClick={handleCopyCurrent}>
+              {copiedLbl ? (
+                <>
+                  <CheckCircle size={14} style={{ color: 'var(--green)', marginRight: '4px' }} />
+                  <span>Copied to Clipboard!</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={14} style={{ marginRight: '4px' }} />
+                  <span>Copy {exportFormat.toUpperCase()} Code</span>
+                </>
+              )}
+            </button>
 
-              <button 
-                className="btn btn-secondary" 
-                style={{ flex: 1, padding: '8px', fontSize: '11px', border: '1px solid #FFCB9A', color: '#FFCB9A' }} 
-                onClick={() => handleCopySpecific('word')}
-              >
-                {copiedWbw ? (
-                  <>
-                    <CheckCircle size={14} style={{ color: 'var(--green)' }} />
-                    <span>Copied WbW!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={14} />
-                    <span>Copy WbW (Word-by-Word)</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button className="btn btn-primary" style={{ flex: 1, padding: '8px', fontSize: '11px' }} onClick={() => handleDownloadSpecific('line')} disabled={!exportText}>
-                <Download size={14} />
-                <span>Download LbL (.lrc)</span>
-              </button>
-
-              <button className="btn btn-primary" style={{ flex: 1, padding: '8px', fontSize: '11px', background: 'var(--accent-gradient)' }} onClick={() => handleDownloadSpecific('word')} disabled={!exportText}>
-                <Download size={14} />
-                <span>Download WbW (.lrc)</span>
-              </button>
-            </div>
+            <button className="btn btn-primary" style={{ flex: 1, padding: '10px', fontSize: '11px', background: 'var(--accent-gradient)', fontWeight: '800' }} onClick={handleDownloadCurrent} disabled={!exportText}>
+              <Download size={14} style={{ marginRight: '4px' }} />
+              <span>Download .{exportFormat === 'doc' ? 'doc' : exportFormat} File</span>
+            </button>
           </div>
         </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, SkipForward, Settings, HelpCircle, ChevronUp, ChevronDown, Trash2, Repeat, RefreshCw, Info, CheckCircle } from 'lucide-react';
+import { Play, Pause, RotateCcw, SkipForward, Settings, HelpCircle, ChevronUp, ChevronDown, Trash2, Repeat, RefreshCw, Info, CheckCircle, Music } from 'lucide-react';
 import { parseLrcText, formatSyncDataToLrc, formatLrcTime } from '../utils/lrcParser';
 
 export default function TabSync({
@@ -22,7 +22,7 @@ export default function TabSync({
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackSpeed, setPlaybackSpeed] = useState(1.0);
-  const [latencyOffset, setLatencyOffset] = useState(150); // ms
+  const [latencyOffset, setLatencyOffset] = useState(100); // ms default
   const [activeLineIndex, setActiveLineIndex] = useState(0);
   const [activeWordIndex, setActiveWordIndex] = useState(0);
   const [showShortcuts, setShowShortcuts] = useState(true);
@@ -1412,106 +1412,134 @@ export default function TabSync({
                 })}
               </div>
 
-              {/* Sync Trigger Panel (Depends on Active Tab) */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto auto auto', gap: '8px', padding: '12px 0 0 0', borderTop: '1px solid var(--border-light)' }}>
+              {/* Unified Ergonomic Sync Controller Bar (Desktop & Mobile) */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--border-light)' }}>
                 {workspaceTab === 'sync' ? (
                   <>
-                    <button 
-                      className="btn btn-primary"
-                      style={{ 
-                        height: '52px', 
-                        fontSize: '15px', 
-                        fontWeight: '700',
-                        letterSpacing: '0.05em',
-                        background: 'var(--accent-gradient)',
-                        boxShadow: '0 4px 20px var(--accent-glow)'
-                      }}
-                      onClick={handleSync}
-                    >
-                      SYNC ({syncMode === 'line' ? 'SPACE / S / ENTER' : 'SPACE / S'})
-                    </button>
-                    <button 
-                      className="btn" 
-                      style={{ 
-                        height: '52px', 
-                        padding: '0 12px',
-                        background: 'rgba(17, 100, 102, 0.25)', 
-                        border: '1px solid #116466', 
-                        borderRadius: '10px',
-                        color: '#D1E8E2',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.5)'
-                      }}
-                      onClick={handleInsertMusicBreak}
-                      title="Start Instrumental Break (Shortcut: M)"
-                    >
-                      BREAK (M)
-                    </button>
-                    <button 
-                      className="btn" 
-                      style={{ 
-                        height: '52px', 
-                        padding: '0 12px',
-                        background: 'rgba(217, 176, 140, 0.2)', 
-                        border: '1px solid #FFCB9A', 
-                        borderRadius: '10px',
-                        color: '#FFCB9A',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        textShadow: '0 1px 2px rgba(0,0,0,0.5)'
-                      }}
-                      onClick={handleMarkEnd}
-                      title="Mark End of Song (Shortcut: E)"
-                    >
-                      END (E)
-                    </button>
-                    <button 
-                      className="btn" 
-                      style={{ 
-                        height: '52px', 
-                        padding: '0 12px',
-                        background: 'rgba(209, 232, 226, 0.08)',
-                        border: '1px solid rgba(209, 232, 226, 0.25)',
-                        borderRadius: '10px',
-                        color: '#ffffff',
-                        fontSize: '11px',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px'
-                      }} 
-                      onClick={handleUndo}
-                      title="Undo last timing and pause (Shortcut: Z / Ctrl+Z)"
-                    >
-                      <RotateCcw size={14} />
-                      <span>UNDO</span>
-                    </button>
-                    <button 
-                      className="btn" 
-                      style={{ 
-                        height: '52px', 
-                        padding: '0 12px',
-                        background: 'rgba(209, 232, 226, 0.08)',
-                        border: '1px solid rgba(209, 232, 226, 0.25)',
-                        borderRadius: '10px',
-                        color: '#ffffff',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                      }} 
-                      onClick={handleSkip}
-                    >
-                      <SkipForward size={14} />
-                    </button>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
+                      
+                      {/* LEFT THUMB / CONTROL WING: PLAY/PAUSE & UNDO [Z] */}
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button 
+                          type="button"
+                          className="btn btn-secondary" 
+                          onClick={togglePlay}
+                          style={{
+                            flex: '1 1 0',
+                            height: '48px',
+                            fontSize: '11px',
+                            fontWeight: '800',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            background: isPlaying ? 'rgba(239, 68, 68, 0.25)' : 'rgba(17, 100, 102, 0.3)',
+                            border: '1px solid var(--accent-blue)'
+                          }}
+                        >
+                          {isPlaying ? <Pause size={15} /> : <Play size={15} />}
+                          <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+                        </button>
+
+                        <button 
+                          type="button"
+                          className="btn btn-secondary" 
+                          onClick={handleUndo}
+                          style={{
+                            flex: '1 1 0',
+                            height: '48px',
+                            fontSize: '11px',
+                            fontWeight: '800',
+                            borderRadius: '12px',
+                            color: '#FFCB9A',
+                            border: '1px solid rgba(255, 203, 154, 0.4)',
+                            background: 'rgba(255, 203, 154, 0.1)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <RotateCcw size={15} />
+                          <span>UNDO [Z]</span>
+                        </button>
+                      </div>
+
+                      {/* RIGHT THUMB / CONTROL WING: BREAK [M] & STAMP [S] */}
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button 
+                          type="button"
+                          className="btn btn-secondary" 
+                          onClick={handleInsertMusicBreak}
+                          style={{
+                            flex: '1 1 0',
+                            height: '48px',
+                            fontSize: '10px',
+                            fontWeight: '800',
+                            borderRadius: '12px',
+                            color: '#D1E8E2',
+                            border: '1px solid var(--border-light)',
+                            background: 'rgba(209, 232, 226, 0.12)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <Music size={15} />
+                          <span>BREAK [M]</span>
+                        </button>
+
+                        <button 
+                          type="button"
+                          className="btn btn-primary" 
+                          onClick={handleSync}
+                          style={{
+                            flex: '1.4 1 0',
+                            height: '48px',
+                            fontSize: '12px',
+                            fontWeight: '900',
+                            background: 'var(--accent-gradient)',
+                            boxShadow: '0 4px 18px var(--accent-glow)',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '4px',
+                            border: 'none'
+                          }}
+                        >
+                          <CheckCircle size={16} />
+                          <span>STAMP [S]</span>
+                        </button>
+                      </div>
+
+                    </div>
+
+                    {/* Bottom Quick Actions Row: END [E], SKIP [D], SET A, SET B */}
+                    <div style={{ display: 'flex', gap: '4px', width: '100%', overflowX: 'auto', paddingTop: '2px' }}>
+                      <button type="button" className="btn btn-secondary" onClick={handleMarkEnd} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                        ⏹️ END [E]
+                      </button>
+                      <button type="button" className="btn btn-secondary" onClick={handleSkip} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                        ⏭️ SKIP [D]
+                      </button>
+                      <button type="button" className="btn btn-secondary" onClick={() => setLoopStart(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                        🚩 SET A
+                      </button>
+                      <button type="button" className="btn btn-secondary" onClick={() => setLoopEnd(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                        🏁 SET B
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <button 
                     className="btn btn-primary"
                     style={{
                       gridColumn: '1 / -1',
-                      height: '52px',
-                      fontSize: '15px',
+                      height: '48px',
+                      fontSize: '14px',
                       background: 'var(--accent-gradient)',
                       boxShadow: '0 4px 15px var(--accent-glow)'
                     }}
@@ -1526,77 +1554,6 @@ export default function TabSync({
             </>
           )}
 
-          {/* Sticky Mobile Touch Sync Controller Bar */}
-          <div className="mobile-sync-controller">
-            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', width: '100%' }}>
-              
-              {/* Primary Big STAMP (S) Button */}
-              <button 
-                type="button"
-                className="btn btn-primary" 
-                onClick={handleSync}
-                style={{
-                  flex: '2 1 0',
-                  padding: '12px 8px',
-                  fontSize: '13px',
-                  fontWeight: '800',
-                  background: 'var(--accent-gradient)',
-                  boxShadow: '0 4px 15px var(--accent-glow)',
-                  borderRadius: '10px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '6px',
-                  border: 'none'
-                }}
-              >
-                <CheckCircle size={16} />
-                <span>STAMP [S]</span>
-              </button>
-
-              {/* PLAY / PAUSE Button */}
-              <button 
-                type="button"
-                className="btn btn-secondary" 
-                onClick={togglePlay}
-                style={{ flex: '1 1 0', padding: '12px 6px', fontSize: '11px', fontWeight: '700', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
-                {isPlaying ? <Pause size={14} /> : <Play size={14} />}
-                <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
-              </button>
-
-              {/* UNDO (Z) Button */}
-              <button 
-                type="button"
-                className="btn btn-secondary" 
-                onClick={handleUndo}
-                style={{ flex: '1 1 0', padding: '12px 6px', fontSize: '11px', fontWeight: '700', borderRadius: '10px', color: '#FFCB9A', border: '1px solid rgba(255, 203, 154, 0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
-                <RotateCcw size={14} />
-                <span>UNDO [Z]</span>
-              </button>
-
-            </div>
-
-            {/* Secondary Shortcuts Row (Break M, Mark End E, Skip D, Loop A/B) */}
-            <div style={{ display: 'flex', gap: '4px', width: '100%', overflowX: 'auto', paddingTop: '2px' }}>
-              <button type="button" className="btn btn-secondary" onClick={handleInsertMusicBreak} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                🎵 BREAK [M]
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={handleMarkEnd} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                ⏹️ END [E]
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={handleSkip} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                ⏭️ SKIP [D]
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={() => setLoopStart(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                🚩 SET A
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={() => setLoopEnd(getPlayerTime())} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                🏁 SET B
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Right Column: Player Controls & Settings */}
@@ -2006,14 +1963,53 @@ export default function TabSync({
               </p>
             </div>
 
-            {/* Reaction Time & Latency Offset Explanation Card */}
-            <div style={{ padding: '12px 14px', background: 'rgba(255, 203, 154, 0.08)', border: '1px solid rgba(255, 203, 154, 0.3)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {/* Reaction Time & Latency Offset Explanation & Initial Setup Card */}
+            <div style={{ padding: '12px 14px', background: 'rgba(255, 203, 154, 0.08)', border: '1px solid rgba(255, 203, 154, 0.3)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                💡 Reaction Time & Latency Offset Tip
+                💡 What is the Latency Offset slider for?
               </span>
-              <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.4' }}>
-                Notice a small delay between hearing a word and pressing <strong>SPACE</strong>? Use the <strong>Latency Offset</strong> slider (or click <code>-150ms</code> / <code>-250ms</code> presets) in Sync Options. Lsync will automatically subtract your reaction delay from every recorded timestamp so your synced lyrics match audio perfectly!
+              <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.9)', lineHeight: '1.5' }}>
+                Feel the synced words are a bit behind or a bit early? Adjust the <strong>Latency Offset</strong> slider according to your hearing-to-tapping reaction ratio to sync words perfectly! Or simply set the latency slider to <code>0ms</code> and slow down the playback speed to sync properly.
               </span>
+
+              {/* Initial Setup Controls */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px', paddingTop: '8px', borderTop: '1px dashed rgba(255, 203, 154, 0.3)' }}>
+                <div className="flex-between">
+                  <span style={{ fontSize: '10px', fontWeight: '700', color: '#FFCB9A' }}>Select Starting Latency Offset:</span>
+                  <span style={{ fontSize: '10px', fontWeight: '700', color: '#fff' }}>{-latencyOffset}ms</span>
+                </div>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {[0, 100, 150, 200, 250].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setLatencyOffset(val)}
+                      style={{ flex: 1, padding: '4px', fontSize: '9px', fontWeight: '700', background: latencyOffset === val ? 'var(--accent-gradient)' : 'rgba(0,0,0,0.3)', color: '#fff', border: latencyOffset === val ? 'none' : '1px solid var(--border-light)' }}
+                    >
+                      {val === 0 ? '0ms' : `-${val}ms`}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="flex-between" style={{ marginTop: '2px' }}>
+                  <span style={{ fontSize: '10px', fontWeight: '700', color: '#FFCB9A' }}>Select Starting Playback Speed:</span>
+                  <span style={{ fontSize: '10px', fontWeight: '700', color: '#fff' }}>{playbackSpeed}x</span>
+                </div>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {[0.5, 0.75, 1.0].map((spd) => (
+                    <button
+                      key={spd}
+                      type="button"
+                      className="btn btn-secondary"
+                      onClick={() => setPlaybackSpeed(spd)}
+                      style={{ flex: 1, padding: '4px', fontSize: '9px', fontWeight: '700', background: playbackSpeed === spd ? 'var(--accent-gradient)' : 'rgba(0,0,0,0.3)', color: '#fff', border: playbackSpeed === spd ? 'none' : '1px solid var(--border-light)' }}
+                    >
+                      {spd}x Speed
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(17, 100, 102, 0.15)', padding: '14px', borderRadius: '12px', border: '1px solid rgba(209, 232, 226, 0.1)' }}>

@@ -104,7 +104,11 @@ body::after {
 }
 
 @media (max-width: 768px) {
-  body {
+  html, body {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    touch-action: pan-y;
     align-items: stretch;
     padding: 0;
     margin: 0;
@@ -118,10 +122,12 @@ body::after {
     border-radius: 0 !important;
     border: none !important;
     box-shadow: none !important;
+    overflow-x: hidden !important;
   }
   .app-body, .app-content {
     padding: 10px 10px 90px 10px !important;
     zoom: 1 !important; /* Reset desktop 1.1x zoom multiplier on mobile */
+    overflow-x: hidden !important;
   }
   .app-header {
     height: auto;
@@ -166,6 +172,9 @@ body::after {
   .list-container {
     max-height: 300px;
   }
+  .demo-edit-btn {
+    margin-bottom: 75px !important;
+  }
 }
 
 /* Sticky Mobile Sync Controller Bar */
@@ -183,13 +192,14 @@ body::after {
     left: 0;
     right: 0;
     z-index: 90;
-    background: rgba(28, 35, 33, 0.96);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(28, 35, 33, 0.98);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border-top: 1px solid rgba(209, 232, 226, 0.25);
-    padding: 10px 12px;
-    margin-top: 12px;
-    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.6);
+    padding: 10px 10px;
+    margin: 10px -10px -10px -10px;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.7);
+    border-radius: 16px 16px 0 0;
   }
 }
 

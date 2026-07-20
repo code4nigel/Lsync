@@ -512,14 +512,15 @@ export default function TabDemo({
 
           {/* Action Button: Edit */}
           <button 
-            className="btn btn-primary" 
+            className="btn btn-primary demo-edit-btn" 
             style={{ 
               width: '100%', 
-              height: '46px', 
+              height: '48px', 
               gap: '8px', 
               background: 'var(--accent-gradient)',
               fontWeight: '700',
-              fontSize: '13px' 
+              fontSize: '13px',
+              marginBottom: '20px'
             }} 
             onClick={() => onBackToEdit(currentTime)}
           >

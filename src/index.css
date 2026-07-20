@@ -114,10 +114,11 @@ body::after {
     margin: 0;
   }
   .app-container {
-    width: 100vw !important;
+    width: 100% !important;
     max-width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
+    height: auto !important;
+    min-height: 100vh !important;
+    max-height: none !important;
     margin: 0 !important;
     border-radius: 0 !important;
     border: none !important;
@@ -126,7 +127,7 @@ body::after {
     box-sizing: border-box !important;
   }
   .app-body, .app-content {
-    padding: 12px 12px 400px 12px !important;
+    padding: 12px 12px 140px 12px !important;
     zoom: 1 !important; /* Reset desktop 1.1x zoom multiplier on mobile */
     overflow-x: hidden !important;
     width: 100% !important;
@@ -138,7 +139,7 @@ body::after {
     box-sizing: border-box !important;
     overflow-x: hidden !important;
     margin: 0 !important;
-    padding-bottom: 350px !important;
+    padding-bottom: 40px !important;
   }
   .app-header {
     height: auto;
@@ -152,15 +153,20 @@ body::after {
     box-sizing: border-box !important;
     margin: 0 !important;
   }
-  .glass-card {
+  .glass-card, .demo-workspace-card, .sync-workspace-card, .export-preview-card {
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box !important;
     height: auto !important;
     max-height: none !important;
+    min-height: 0 !important;
     padding: 14px !important;
     margin: 0 !important;
     overflow: visible !important;
+  }
+  .lyrics-demo-scroller {
+    padding-top: 40px !important;
+    padding-bottom: 120px !important;
   }
   .export-preview-textarea {
     min-height: 280px !important;
@@ -168,7 +174,7 @@ body::after {
   }
   .sync-controller-bar {
     position: fixed !important;
-    bottom: 58px !important;
+    bottom: 68px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: 94vw !important;
@@ -184,7 +190,7 @@ body::after {
     box-sizing: border-box !important;
   }
   .floating-dock {
-    bottom: 8px !important;
+    bottom: 16px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     width: auto !important;

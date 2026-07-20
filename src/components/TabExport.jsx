@@ -115,7 +115,7 @@ export default function TabExport({
       <div className="grid-2" style={{ gridTemplateColumns: '1fr 340px', gap: '20px' }}>
         
         {/* Left Column: Preview Textbox */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: '560px' }}>
+        <div className="glass-card export-preview-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div className="flex-between" style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
             <h3 style={{ fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', color: '#fff' }}>
               <FileText size={18} style={{ color: 'var(--accent-purple)' }} /> Generated Export Code

@@ -291,12 +291,10 @@ export default function TabDemo({
         
         {/* Left: Spotify-style scrolling lyrics with Liquid Glass frosted design */}
         <div 
-          className="glass-card" 
+          className="glass-card demo-workspace-card" 
           style={{ 
             display: 'flex', 
             flexDirection: 'column', 
-            height: '560px', 
-            maxHeight: '560px',
             position: 'relative', 
             overflow: 'hidden',
             background: 'rgba(44, 53, 49, 0.45)',

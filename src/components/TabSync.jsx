@@ -212,30 +212,13 @@ export default function TabSync({
     }
   }, [initialSeekTime, currentTrack, syncData]);
 
-  // Initialize syncData when lyrics load
+  // Initialize syncData when lyrics load (supports both plain & pre-synced LRC code)
   useEffect(() => {
     if (!currentLyrics) return;
     
-    const parsedLines = currentLyrics
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
-      .map((lineText) => {
-        const words = lineText.split(/\s+/).filter(w => w.length > 0).map(wordText => ({
-          text: wordText,
-          time: null
-        }));
-        
-        return {
-          text: lineText,
-          time: null,
-          breakTime: null,
-          words: words
-        };
-      });
-      
-    if (syncData.length === 0 || syncData[0].text !== parsedLines[0]?.text) {
-      setSyncData(parsedLines);
+    const parsed = parseLrcText(currentLyrics);
+    if (parsed && parsed.length > 0) {
+      setSyncData(parsed);
       setActiveLineIndex(0);
       setActiveWordIndex(0);
       setSelectedIndices([]);
@@ -932,7 +915,7 @@ export default function TabSync({
       <div className="grid-2" style={{ gridTemplateColumns: '1fr 340px', gap: '20px' }}>
         
         {/* Left Column: Sync Timeline Workspace */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: '560px' }}>
+        <div className="glass-card sync-workspace-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
           {/* Sub-tab selection bar */}
           <div className="flex-between" style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>
@@ -1490,178 +1473,179 @@ export default function TabSync({
                 })}
               </div>
 
-              {/* Unified Ergonomic Sync Controller Bar (Desktop & Mobile - Hidden when Guide Modal is open) */}
+              {/* Unified Ergonomic Sync Controller Bar (Desktop & Mobile - Always visible floating dock) */}
               {!showTutorial && (
                 <div className="sync-controller-bar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '12px', borderTop: '1px solid var(--border-light)' }}>
-                {workspaceTab === 'sync' ? (
-                  <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
-                      
-                      {/* LEFT THUMB / CONTROL WING: PLAY/PAUSE & BREAK [M] (PINK) */}
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <button 
-                          type="button"
-                          className="btn btn-secondary" 
-                          onClick={togglePlay}
-                          style={{
-                            flex: '1 1 0',
-                            height: '48px',
-                            fontSize: '11px',
-                            fontWeight: '800',
-                            borderRadius: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px',
-                            background: isPlaying ? 'rgba(239, 68, 68, 0.25)' : 'rgba(17, 100, 102, 0.3)',
-                            border: '1px solid var(--accent-blue)'
-                          }}
-                        >
-                          {isPlaying ? <Pause size={15} /> : <Play size={15} />}
-                          <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
-                        </button>
+                  {workspaceTab === 'resync' ? (
+                    <button 
+                      className="btn btn-primary"
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        fontSize: '14px',
+                        background: 'var(--accent-gradient)',
+                        boxShadow: '0 4px 15px var(--accent-glow)'
+                      }}
+                      disabled={selectedIndices.length === 0}
+                      onClick={handleStartReSync}
+                    >
+                      <RefreshCw size={16} style={{ marginRight: '6px' }} />
+                      RE-SYNC & LOOP SELECTED RANGE ({selectedIndices.length} lines)
+                    </button>
+                  ) : (
+                    <>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', width: '100%' }}>
+                        
+                        {/* LEFT THUMB / CONTROL WING: PLAY/PAUSE & BREAK [M] (PINK) */}
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button 
+                            type="button"
+                            className="btn btn-secondary" 
+                            onClick={togglePlay}
+                            style={{
+                              flex: '1 1 0',
+                              height: '48px',
+                              fontSize: '11px',
+                              fontWeight: '800',
+                              borderRadius: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              background: isPlaying ? 'rgba(239, 68, 68, 0.25)' : 'rgba(17, 100, 102, 0.3)',
+                              border: '1px solid var(--accent-blue)'
+                            }}
+                          >
+                            {isPlaying ? <Pause size={15} /> : <Play size={15} />}
+                            <span>{isPlaying ? 'PAUSE' : 'PLAY'}</span>
+                          </button>
 
-                        <button 
-                          type="button"
-                          className="btn btn-secondary" 
-                          onClick={handleInsertMusicBreak}
-                          style={{
-                            flex: '1 1 0',
-                            height: '48px',
-                            fontSize: '10px',
-                            fontWeight: '800',
-                            borderRadius: '12px',
-                            color: '#F472B6',
-                            border: '1px solid rgba(244, 114, 182, 0.4)',
-                            background: 'rgba(244, 114, 182, 0.15)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px',
-                            boxShadow: '0 2px 10px rgba(244, 114, 182, 0.2)'
-                          }}
-                        >
-                          <Music size={15} />
-                          <span>BREAK [M]</span>
-                        </button>
+                          <button 
+                            type="button"
+                            className="btn btn-secondary" 
+                            onClick={handleInsertMusicBreak}
+                            style={{
+                              flex: '1 1 0',
+                              height: '48px',
+                              fontSize: '10px',
+                              fontWeight: '800',
+                              borderRadius: '12px',
+                              color: '#F472B6',
+                              border: '1px solid rgba(244, 114, 182, 0.4)',
+                              background: 'rgba(244, 114, 182, 0.15)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px',
+                              boxShadow: '0 2px 10px rgba(244, 114, 182, 0.2)'
+                            }}
+                          >
+                            <Music size={15} />
+                            <span>BREAK [M]</span>
+                          </button>
+                        </div>
+
+                        {/* RIGHT THUMB / CONTROL WING: UNDO [Z] & STAMP [S] */}
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                          <button 
+                            type="button"
+                            className="btn btn-secondary" 
+                            onClick={handleUndo}
+                            style={{
+                              flex: '1 1 0',
+                              height: '48px',
+                              fontSize: '11px',
+                              fontWeight: '800',
+                              borderRadius: '12px',
+                              color: '#FFCB9A',
+                              border: '1px solid rgba(255, 203, 154, 0.4)',
+                              background: 'rgba(255, 203, 154, 0.1)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <RotateCcw size={15} />
+                            <span>UNDO [Z]</span>
+                          </button>
+
+                          <button 
+                            type="button"
+                            className="btn btn-secondary" 
+                            onClick={() => handleStampWordOrLine()}
+                            style={{
+                              flex: '1 1 0',
+                              height: '48px',
+                              fontSize: '11px',
+                              fontWeight: '800',
+                              borderRadius: '12px',
+                              background: 'var(--accent-gradient)',
+                              color: '#fff',
+                              border: 'none',
+                              boxShadow: '0 4px 15px var(--accent-glow)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              gap: '4px'
+                            }}
+                          >
+                            <CheckCircle size={15} />
+                            <span>STAMP [S]</span>
+                          </button>
+                        </div>
+
                       </div>
 
-                      {/* RIGHT THUMB / CONTROL WING: UNDO [Z] & STAMP [S] */}
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <button 
-                          type="button"
-                          className="btn btn-secondary" 
-                          onClick={handleUndo}
-                          style={{
-                            flex: '1 1 0',
-                            height: '48px',
-                            fontSize: '11px',
-                            fontWeight: '800',
-                            borderRadius: '12px',
-                            color: '#FFCB9A',
-                            border: '1px solid rgba(255, 203, 154, 0.4)',
-                            background: 'rgba(255, 203, 154, 0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px'
-                          }}
-                        >
-                          <RotateCcw size={15} />
-                          <span>UNDO [Z]</span>
+                      {/* Bottom Quick Actions Row: END [E], SKIP [D], LOOP, OPTIONS */}
+                      <div style={{ display: 'flex', gap: '4px', width: '100%', overflowX: 'auto', paddingTop: '2px' }}>
+                        <button type="button" className="btn btn-secondary" onClick={handleMarkEnd} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                          ⏹️ END [E]
                         </button>
-
+                        <button type="button" className="btn btn-secondary" onClick={handleSkip} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
+                          ⏭️ SKIP [D]
+                        </button>
                         <button 
-                          type="button"
-                          className="btn btn-primary" 
-                          onClick={handleSync}
-                          style={{
-                            flex: '1.4 1 0',
-                            height: '48px',
-                            fontSize: '12px',
-                            fontWeight: '900',
-                            background: 'var(--accent-gradient)',
-                            boxShadow: '0 4px 18px var(--accent-glow)',
-                            borderRadius: '12px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '4px',
-                            border: 'none'
+                          type="button" 
+                          className="btn btn-secondary" 
+                          onClick={() => {
+                            playUiSound('click');
+                            setLoopEnabled(prev => !prev);
+                          }} 
+                          style={{ 
+                            flex: '1 0 auto', 
+                            padding: '6px 8px', 
+                            fontSize: '10px', 
+                            fontWeight: '700', 
+                            whiteSpace: 'nowrap',
+                            background: loopEnabled ? 'rgba(17, 100, 102, 0.4)' : 'rgba(255,255,255,0.03)',
+                            border: loopEnabled ? '1px solid var(--accent-blue)' : '1px solid var(--border-light)',
+                            color: loopEnabled ? '#fff' : 'var(--text-sub)'
                           }}
                         >
-                          <CheckCircle size={16} />
-                          <span>STAMP [S]</span>
+                          🔁 LOOP {loopEnabled ? '(ON)' : '(OFF)'}
+                        </button>
+                        <button 
+                          type="button" 
+                          className="btn btn-secondary" 
+                          onClick={handleToggleSyncOptionsScroll} 
+                          style={{ 
+                            flex: '1 0 auto', 
+                            padding: '6px 8px', 
+                            fontSize: '10px', 
+                            fontWeight: '700', 
+                            whiteSpace: 'nowrap',
+                            background: isViewingSyncOptions ? 'rgba(255, 203, 154, 0.25)' : 'rgba(255,255,255,0.03)',
+                            border: isViewingSyncOptions ? '1px solid #FFCB9A' : '1px solid var(--border-light)',
+                            color: isViewingSyncOptions ? '#FFCB9A' : 'var(--text-sub)'
+                          }}
+                        >
+                          ⚙️ OPTIONS {isViewingSyncOptions ? '↑' : '↓'}
                         </button>
                       </div>
-
-                    </div>
-
-                    {/* Bottom Quick Actions Row: END [E], SKIP [D], LOOP, OPTIONS */}
-                    <div style={{ display: 'flex', gap: '4px', width: '100%', overflowX: 'auto', paddingTop: '2px' }}>
-                      <button type="button" className="btn btn-secondary" onClick={handleMarkEnd} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                        ⏹️ END [E]
-                      </button>
-                      <button type="button" className="btn btn-secondary" onClick={handleSkip} style={{ flex: '1 0 auto', padding: '6px 8px', fontSize: '10px', fontWeight: '700', whiteSpace: 'nowrap' }}>
-                        ⏭️ SKIP [D]
-                      </button>
-                      <button 
-                        type="button" 
-                        className="btn btn-secondary" 
-                        onClick={() => {
-                          playUiSound('click');
-                          setLoopEnabled(prev => !prev);
-                        }} 
-                        style={{ 
-                          flex: '1 0 auto', 
-                          padding: '6px 8px', 
-                          fontSize: '10px', 
-                          fontWeight: '700', 
-                          whiteSpace: 'nowrap',
-                          background: loopEnabled ? 'rgba(17, 100, 102, 0.4)' : 'rgba(255,255,255,0.03)',
-                          border: loopEnabled ? '1px solid var(--accent-blue)' : '1px solid var(--border-light)',
-                          color: loopEnabled ? '#fff' : 'var(--text-sub)'
-                        }}
-                      >
-                        🔁 LOOP {loopEnabled ? '(ON)' : '(OFF)'}
-                      </button>
-                      <button 
-                        type="button" 
-                        className="btn btn-secondary" 
-                        onClick={handleToggleSyncOptionsScroll} 
-                        style={{ 
-                          flex: '1 0 auto', 
-                          padding: '6px 8px', 
-                          fontSize: '10px', 
-                          fontWeight: '700', 
-                          whiteSpace: 'nowrap',
-                          background: isViewingSyncOptions ? 'rgba(255, 203, 154, 0.25)' : 'rgba(255,255,255,0.03)',
-                          border: isViewingSyncOptions ? '1px solid #FFCB9A' : '1px solid var(--border-light)',
-                          color: isViewingSyncOptions ? '#FFCB9A' : 'var(--text-sub)'
-                        }}
-                      >
-                        ⚙️ OPTIONS {isViewingSyncOptions ? '↑' : '↓'}
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <button 
-                    className="btn btn-primary"
-                    style={{
-                      gridColumn: '1 / -1',
-                      height: '48px',
-                      fontSize: '14px',
-                      background: 'var(--accent-gradient)',
-                      boxShadow: '0 4px 15px var(--accent-glow)'
-                    }}
-                    disabled={selectedIndices.length === 0}
-                    onClick={handleStartReSync}
-                  >
-                    <RefreshCw size={16} style={{ marginRight: '6px' }} />
-                    RE-SYNC & LOOP SELECTED RANGE ({selectedIndices.length} lines)
-                  </button>
-                )}
-              </div>
+                    </>
+                  )}
+                </div>
               )}
             </>
           )}
@@ -1669,7 +1653,7 @@ export default function TabSync({
         </div>
 
         {/* Right Column: Player Controls & Settings */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', maxHeight: '560px', overflowY: 'auto', paddingRight: '4px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingRight: '4px' }}>
           
           <div className="glass-card mini-player" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Sliders, Check, Settings, Compass, Layout, ZoomIn, Type, Globe, Sparkles } from 'lucide-react';
+import { Sliders, Check, Settings, Compass, Layout, ZoomIn, Type, Globe, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import devAvatar from '../../Images/developer.png';
+import { playUiSound } from '../utils/soundEngine';
 
 export default function TabSettings({ 
   bgTheme, 
@@ -10,7 +11,9 @@ export default function TabSettings({
   globalFontSize,
   onChangeGlobalFontSize,
   lyricsFontSize,
-  onChangeLyricsFontSize
+  onChangeLyricsFontSize,
+  uiVolume = 0.5,
+  onChangeUiVolume
 }) {
   const themes = [
     {
@@ -54,7 +57,7 @@ export default function TabSettings({
               return (
                 <div
                   key={t.id}
-                  onClick={() => onChangeBgTheme(t.id)}
+                  onClick={() => { playUiSound('modal'); onChangeBgTheme(t.id); }}
                   style={{
                     padding: '12px 14px',
                     borderRadius: '12px',
@@ -89,7 +92,7 @@ export default function TabSettings({
                         <span style={{ fontSize: '8px', fontWeight: '700', color: '#FFCB9A', border: '1px solid rgba(255,203,154,0.3)', padding: '0 4px', borderRadius: '10px', background: 'rgba(255,203,154,0.05)' }}>ACTIVE</span>
                       )}
                     </div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-sub)', marginTop: '2px', lineHeight: '1.3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <div style={{ fontSize: '10px', color: 'var(--text-sub)', marginTop: '2px', lineHeight: '1.4', whiteSpace: 'normal' }}>
                       {t.description}
                     </div>
                   </div>
@@ -116,6 +119,66 @@ export default function TabSettings({
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
             
+            {/* UI Sound Effects Volume Control Slider */}
+            <div className="form-group" style={{ marginBottom: '0', padding: '12px', background: 'rgba(17, 100, 102, 0.12)', border: '1px solid rgba(209, 232, 226, 0.2)', borderRadius: '12px' }}>
+              <div className="flex-between" style={{ marginBottom: '6px' }}>
+                <label style={{ fontSize: '11px', fontWeight: '700', color: '#fff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  {uiVolume > 0 ? <Volume2 size={14} style={{ color: '#FFCB9A' }} /> : <VolumeX size={14} style={{ color: '#ef4444' }} />} UI Sound Effects Volume
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A' }}>
+                    {Math.round(uiVolume * 100)}%
+                  </span>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (onChangeUiVolume) onChangeUiVolume(uiVolume > 0 ? 0 : 0.5);
+                    }}
+                    style={{
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(255,255,255,0.15)',
+                      borderRadius: '4px',
+                      padding: '2px 8px',
+                      fontSize: '9px',
+                      color: uiVolume > 0 ? '#FFCB9A' : '#ef4444',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {uiVolume > 0 ? 'Mute' : 'Unmute'}
+                  </button>
+                </div>
+              </div>
+              <input 
+                type="range" 
+                min="0.0" 
+                max="1.0" 
+                step="0.05" 
+                value={uiVolume}
+                onChange={(e) => {
+                  if (onChangeUiVolume) onChangeUiVolume(parseFloat(e.target.value));
+                }}
+                style={{ width: '100%', height: '4px', accentColor: '#116466', cursor: 'pointer' }}
+              />
+              <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ flex: 1, padding: '4px', fontSize: '9px', fontWeight: '700' }}
+                  onClick={() => playUiSound('dock')}
+                >
+                  🔊 Test Dock Sound
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary" 
+                  style={{ flex: 1, padding: '4px', fontSize: '9px', fontWeight: '700' }}
+                  onClick={() => playUiSound('click')}
+                >
+                  🔊 Test UI Click
+                </button>
+              </div>
+            </div>
+
             {/* UI Scale Slider */}
             <div className="form-group" style={{ marginBottom: '0' }}>
               <div className="flex-between" style={{ marginBottom: '6px' }}>
@@ -317,16 +380,10 @@ function DeveloperProfileCard() {
 
   const [factIndex, setFactIndex] = React.useState(0);
   const [factAnimating, setFactAnimating] = React.useState(false);
-  const [clickCount, setClickCount] = React.useState(0);
-  const [showLogs, setShowLogs] = React.useState(false);
 
   const handleFactClick = () => {
+    playUiSound('click');
     setFactAnimating(true);
-    setClickCount(prev => prev + 1);
-
-    if (clickCount + 1 >= 5 && !showLogs) {
-      setShowLogs(true);
-    }
 
     setTimeout(() => {
       let nextIndex;
@@ -409,31 +466,6 @@ function DeveloperProfileCard() {
           {devFacts[factIndex]}
         </p>
       </div>
-
-      {/* Easter Egg Debug Console */}
-      {showLogs && (
-        <div style={{
-          marginTop: '6px',
-          fontFamily: 'monospace',
-          fontSize: '10px',
-          color: '#D1E8E2',
-          background: 'rgba(4, 4, 6, 0.85)',
-          padding: '10px 12px',
-          borderRadius: '8px',
-          border: '1px solid var(--border-light)',
-          animation: 'fadeIn 0.2s ease'
-        }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#FFCB9A', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>SYSTEM LOGS [EASTER EGG UNLOCKED]:</span>
-            <span style={{ cursor: 'pointer', textDecoration: 'underline', fontSize: '9px' }} onClick={() => setShowLogs(false)}>Close</span>
-          </div>
-          <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.4', color: 'rgba(209, 232, 226, 0.8)' }}>
-            [Lsync Engine] Status: 100% Operational{'\n'}
-            [Audio Core] 60FPS Web Audio Syncher ready{'\n'}
-            [Developer Easter Egg] NigelWeb facts counter unlocked ({clickCount} clicks)
-          </div>
-        </div>
-      )}
 
     </div>
   );

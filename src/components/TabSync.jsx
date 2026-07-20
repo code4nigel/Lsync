@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, RotateCcw, SkipForward, Settings, HelpCircle, ChevronUp, ChevronDown, Trash2, Repeat, RefreshCw, Info, CheckCircle, Music } from 'lucide-react';
+import { Play, Pause, RotateCcw, SkipForward, Settings, HelpCircle, ChevronUp, ChevronDown, Trash2, Repeat, RefreshCw, Info, CheckCircle, Music, Bookmark, Save, Plus, X } from 'lucide-react';
 import { parseLrcText, formatSyncDataToLrc, formatLrcTime } from '../utils/lrcParser';
+import { playUiSound } from '../utils/soundEngine';
 
 export default function TabSync({
   currentTrack,
@@ -36,6 +37,48 @@ export default function TabSync({
   // Workspace sub-tab: 'sync', 'resync', or 'retimer'
   const [workspaceTab, setWorkspaceTab] = useState(initialWorkspaceTab || 'sync');
   const [isTransitioning, setIsTransitioning] = useState(false);
+
+  // Custom Presets Profiles State
+  const [presetProfiles, setPresetProfiles] = useState(() => {
+    try {
+      const saved = localStorage.getItem('lsync_preset_profiles');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [newPresetName, setNewPresetName] = useState('');
+
+  const handleSavePreset = (e) => {
+    e.preventDefault();
+    if (!newPresetName.trim()) return;
+    const newProfile = {
+      id: Date.now().toString(),
+      name: newPresetName.trim(),
+      latencyOffset,
+      playbackSpeed,
+      lyricsFontSize,
+      syncMode
+    };
+    const updated = [...presetProfiles, newProfile];
+    setPresetProfiles(updated);
+    localStorage.setItem('lsync_preset_profiles', JSON.stringify(updated));
+    setNewPresetName('');
+  };
+
+  const handleLoadPreset = (p) => {
+    setLatencyOffset(p.latencyOffset);
+    changeSpeed(p.playbackSpeed);
+    setLyricsFontSize(p.lyricsFontSize);
+    if (p.syncMode) setSyncMode(p.syncMode);
+  };
+
+  const handleDeletePreset = (id, e) => {
+    e.stopPropagation();
+    const updated = presetProfiles.filter(p => p.id !== id);
+    setPresetProfiles(updated);
+    localStorage.setItem('lsync_preset_profiles', JSON.stringify(updated));
+  };
 
   useEffect(() => {
     if (initialWorkspaceTab) {
@@ -865,7 +908,7 @@ export default function TabSync({
             <div style={{ display: 'flex', gap: '18px', alignItems: 'center' }}>
               <button 
                 className={`workspace-tab ${workspaceTab === 'sync' ? 'active' : ''}`}
-                onClick={() => { setSelectedIndices([]); setWorkspaceTab('sync'); }}
+                onClick={() => { playUiSound('click'); setSelectedIndices([]); setWorkspaceTab('sync'); }}
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -881,7 +924,7 @@ export default function TabSync({
               </button>
               <button 
                 className={`workspace-tab ${workspaceTab === 'resync' ? 'active' : ''}`}
-                onClick={() => { setSelectedIndices([]); setWorkspaceTab('resync'); }}
+                onClick={() => { playUiSound('click'); setSelectedIndices([]); setWorkspaceTab('resync'); }}
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -897,7 +940,7 @@ export default function TabSync({
               </button>
               <button 
                 className={`workspace-tab ${workspaceTab === 'retimer' ? 'active' : ''}`}
-                onClick={() => { setSelectedIndices([]); setWorkspaceTab('retimer'); }}
+                onClick={() => { playUiSound('click'); setSelectedIndices([]); setWorkspaceTab('retimer'); }}
                 style={{
                   background: 'transparent',
                   border: 'none',
@@ -914,26 +957,27 @@ export default function TabSync({
 
               {/* Welcome Info tour Trigger Button */}
               <button
-                onClick={() => setShowTutorial(true)}
+                type="button"
+                onClick={() => { playUiSound('modal'); setShowTutorial(true); }}
                 style={{
-                  background: 'rgba(168, 85, 247, 0.1)',
-                  border: '1px solid rgba(168, 85, 247, 0.3)',
-                  borderRadius: '50%',
-                  width: '20px',
-                  height: '20px',
+                  background: 'linear-gradient(135deg, #FFCB9A 0%, #D1E8E2 100%)',
+                  border: '1px solid #FFCB9A',
+                  borderRadius: '16px',
+                  padding: '3px 9px',
                   display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--accent-purple)',
+                  gap: '4px',
+                  color: '#1C2321',
                   cursor: 'pointer',
-                  fontSize: '10px',
-                  fontWeight: 'bold',
-                  boxShadow: '0 0 8px rgba(168, 85, 247, 0.15)',
-                  transition: 'all 0.2s'
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  boxShadow: '0 2px 10px rgba(255, 203, 154, 0.4)',
+                  transition: 'all 0.2s ease-in-out'
                 }}
-                title="Quick shortcuts guide"
+                title="Quick Guide & Latency Settings"
               >
-                i
+                <HelpCircle size={12} style={{ strokeWidth: 2.5 }} />
+                <span>Guide</span>
               </button>
             </div>
             <span style={{ fontSize: '11px', color: 'var(--text-sub)' }}>
@@ -965,7 +1009,7 @@ export default function TabSync({
                     <button 
                       type="button"
                       className="btn"
-                      onClick={() => setRetimerDirection('+')}
+                      onClick={() => { playUiSound('click'); setRetimerDirection('+'); }}
                       style={{ padding: '4px 10px', fontSize: '11px', background: retimerDirection === '+' ? 'var(--accent-gradient)' : 'transparent', color: '#fff', fontWeight: '700' }}
                     >
                       + Delay (+)
@@ -973,7 +1017,7 @@ export default function TabSync({
                     <button 
                       type="button"
                       className="btn"
-                      onClick={() => setRetimerDirection('-')}
+                      onClick={() => { playUiSound('click'); setRetimerDirection('-'); }}
                       style={{ padding: '4px 10px', fontSize: '11px', background: retimerDirection === '-' ? 'var(--accent-gradient)' : 'transparent', color: '#fff', fontWeight: '700' }}
                     >
                       - Advance (-)
@@ -1043,6 +1087,7 @@ export default function TabSync({
                       className="btn btn-secondary"
                       style={{ padding: '2px 7px', fontSize: '9px', borderRadius: '4px' }}
                       onClick={() => {
+                        playUiSound('click');
                         setRetimerDirection(p.dir);
                         setRetimerMins(p.m);
                         setRetimerSecs(p.s);
@@ -1102,6 +1147,7 @@ export default function TabSync({
                         className="btn btn-primary"
                         style={{ width: '100%', padding: '6px', fontSize: '10px', background: 'var(--accent-gradient)' }}
                         onClick={() => {
+                          playUiSound('modal');
                           if (retimerInputText.trim()) {
                             const dataset = parseLrcText(retimerInputText);
                             setSyncData(dataset);
@@ -1110,7 +1156,7 @@ export default function TabSync({
                         }}
                         disabled={!retimerInputText.trim()}
                       >
-                        Parse LRC & Load to Workspace ✨
+                        Paste Lyrics to Load ✨
                       </button>
                     </div>
                   ) : (
@@ -1183,6 +1229,7 @@ export default function TabSync({
                 className="btn btn-primary" 
                 style={{ width: '100%', height: '38px', background: 'var(--accent-gradient)', fontWeight: '700', fontSize: '12px', boxShadow: '0 4px 15px var(--accent-glow)' }}
                 onClick={() => {
+                  playUiSound('modal');
                   const shifted = getShiftedDataset();
                   setSyncData(shifted);
                   if (onSetDemoOverride) onSetDemoOverride(null);
@@ -1190,7 +1237,7 @@ export default function TabSync({
                   alert(`Successfully applied time shift of ${retimerOffsetSec >= 0 ? '+' : ''}${retimerOffsetSec.toFixed(3)}s to all lyrics!`);
                 }}
               >
-                Apply Shifted Timings to Workspace ✨
+                Apply effect to lyrics ✨
               </button>
 
             </div>
@@ -1654,13 +1701,13 @@ export default function TabSync({
 
           {/* Action buttons (Clear and Export) — Placed directly below the player so they are never buried */}
           <div style={{ display: 'flex', gap: '12px' }}>
-            <button className="btn btn-danger" style={{ flex: 1, padding: '10px 14px' }} onClick={handleResetAll}>
+            <button className="btn btn-danger" style={{ flex: 1, padding: '10px 14px' }} onClick={() => { playUiSound('modal'); handleResetAll(); }}>
               <Trash2 size={14} /> Clear Timings
             </button>
             <button 
               className="btn btn-primary" 
               style={{ flex: 1, padding: '10px 14px', background: 'var(--accent-gradient)', boxShadow: '0 4px 15px var(--accent-glow)' }} 
-              onClick={onNextTab}
+              onClick={() => { playUiSound('modal'); onNextTab(); }}
               disabled={syncData.length === 0 || !syncData.some(line => line.time !== null)}
             >
               Export Lyrics
@@ -1736,7 +1783,7 @@ export default function TabSync({
               <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '20px', overflow: 'hidden', padding: '2px', background: 'rgba(0,0,0,0.2)' }}>
                 <button 
                   className={`btn ${settingsTab === 'options' ? 'active-pill' : ''}`}
-                  onClick={() => setSettingsTab('options')}
+                  onClick={() => { playUiSound('click'); setSettingsTab('options'); }}
                   style={{
                     borderRadius: '16px',
                     padding: '4px 12px',
@@ -1751,7 +1798,7 @@ export default function TabSync({
                 </button>
                 <button 
                   className={`btn ${settingsTab === 'shortcuts' ? 'active-pill' : ''}`}
-                  onClick={() => setSettingsTab('shortcuts')}
+                  onClick={() => { playUiSound('click'); setSettingsTab('shortcuts'); }}
                   style={{
                     borderRadius: '16px',
                     padding: '4px 12px',
@@ -1771,11 +1818,28 @@ export default function TabSync({
             {settingsTab === 'options' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 
-                {/* 1. Latency Offset at Top */}
+                {/* 1. Latency Offset with Reset Button */}
                 <div className="form-group" style={{ marginBottom: '0' }}>
                   <div className="flex-between" style={{ marginBottom: '4px' }}>
-                    <label style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Latency Offset</label>
-                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A' }}>-{latencyOffset}ms</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Latency Offset</label>
+                      <button 
+                        type="button"
+                        onClick={() => setLatencyOffset(100)}
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '4px',
+                          padding: '1px 6px',
+                          fontSize: '9px',
+                          color: '#fff',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A' }}>{-latencyOffset}ms</span>
                   </div>
                   <input 
                     type="range" 
@@ -1786,38 +1850,42 @@ export default function TabSync({
                     onChange={(e) => setLatencyOffset(parseInt(e.target.value))}
                     style={{ width: '100%', height: '4px', accentColor: '#116466', cursor: 'pointer' }}
                   />
-                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary"
-                      style={{ flex: 1, padding: '3px', fontSize: '9px', fontWeight: '600' }}
-                      onClick={() => setLatencyOffset(0)}
-                    >
-                      0ms (Exact)
-                    </button>
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary"
-                      style={{ flex: 1, padding: '3px', fontSize: '9px', fontWeight: '600' }}
-                      onClick={() => setLatencyOffset(150)}
-                    >
-                      -150ms
-                    </button>
-                    <button 
-                      type="button" 
-                      className="btn btn-secondary"
-                      style={{ flex: 1, padding: '3px', fontSize: '9px', fontWeight: '600' }}
-                      onClick={() => setLatencyOffset(250)}
-                    >
-                      -250ms
-                    </button>
+                  <div style={{ display: 'flex', gap: '4px', marginTop: '6px', overflowX: 'auto' }}>
+                    {[0, 100, 150, 200, 250].map((val) => (
+                      <button 
+                        key={val}
+                        type="button" 
+                        className="btn btn-secondary"
+                        style={{ flex: 1, padding: '3px', fontSize: '9px', fontWeight: '600', background: latencyOffset === val ? 'var(--accent-gradient)' : 'rgba(0,0,0,0.2)' }}
+                        onClick={() => setLatencyOffset(val)}
+                      >
+                        {val === 0 ? '0ms' : `-${val}ms`}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                {/* 2. Playback Speed */}
+                {/* 2. Playback Speed with Reset Button & Presets Bar */}
                 <div className="form-group" style={{ marginBottom: '0' }}>
                   <div className="flex-between" style={{ marginBottom: '4px' }}>
-                    <label style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Playback Speed</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Playback Speed</label>
+                      <button 
+                        type="button"
+                        onClick={() => changeSpeed(1.0)}
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '4px',
+                          padding: '1px 6px',
+                          fontSize: '9px',
+                          color: '#fff',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </div>
                     <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A' }}>{playbackSpeed}x</span>
                   </div>
                   <input 
@@ -1829,6 +1897,20 @@ export default function TabSync({
                     onChange={(e) => changeSpeed(parseFloat(e.target.value))}
                     style={{ width: '100%', height: '4px', accentColor: '#116466', cursor: 'pointer' }}
                   />
+                  {/* Speed Presets Bar */}
+                  <div style={{ display: 'flex', gap: '3px', marginTop: '6px', overflowX: 'auto' }}>
+                    {[1.0, 0.85, 0.80, 0.75, 0.70, 0.50, 0.45].map((spd) => (
+                      <button 
+                        key={spd}
+                        type="button" 
+                        className="btn btn-secondary"
+                        style={{ flex: 1, padding: '3px 2px', fontSize: '9px', fontWeight: '700', whiteSpace: 'nowrap', background: playbackSpeed === spd ? 'var(--accent-gradient)' : 'rgba(0,0,0,0.2)' }}
+                        onClick={() => changeSpeed(spd)}
+                      >
+                        {spd}x
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 {/* 3. Sync Method */}
@@ -1868,10 +1950,27 @@ export default function TabSync({
                   </div>
                 </div>
 
-                {/* 4. Lyrics Font Size */}
+                {/* 4. Lyrics Font Size with Reset Button */}
                 <div className="form-group" style={{ marginBottom: '0' }}>
                   <div className="flex-between" style={{ marginBottom: '4px' }}>
-                    <label style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lyrics Font Size</label>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <label style={{ fontSize: '11px', fontWeight: '700', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Lyrics Font Size</label>
+                      <button 
+                        type="button"
+                        onClick={() => setLyricsFontSize(28)}
+                        style={{
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '4px',
+                          padding: '1px 6px',
+                          fontSize: '9px',
+                          color: '#fff',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Reset
+                      </button>
+                    </div>
                     <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A' }}>{lyricsFontSize}px</span>
                   </div>
                   <input 
@@ -1883,6 +1982,88 @@ export default function TabSync({
                     onChange={(e) => setLyricsFontSize(parseInt(e.target.value))}
                     style={{ width: '100%', height: '4px', accentColor: '#116466', cursor: 'pointer' }}
                   />
+                </div>
+
+                {/* 5. Custom Presets Profile Manager (Save & Load) */}
+                <div style={{ padding: '10px 12px', background: 'rgba(17, 100, 102, 0.15)', border: '1px solid rgba(209, 232, 226, 0.2)', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFCB9A', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Bookmark size={13} /> Saved Sync Preset Profiles
+                  </span>
+                  
+                  {/* Built-in Presets */}
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => handleLoadPreset({ latencyOffset: 100, playbackSpeed: 1.0, lyricsFontSize: 28, syncMode: 'word' })}
+                      style={{ padding: '4px 8px', fontSize: '9px', fontWeight: '700', borderRadius: '12px' }}
+                    >
+                      ⚡ Standard (1.0x / -100ms)
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => handleLoadPreset({ latencyOffset: 100, playbackSpeed: 0.75, lyricsFontSize: 32, syncMode: 'word' })}
+                      style={{ padding: '4px 8px', fontSize: '9px', fontWeight: '700', borderRadius: '12px' }}
+                    >
+                      🐢 Precision (0.75x / -100ms)
+                    </button>
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => handleLoadPreset({ latencyOffset: 0, playbackSpeed: 0.50, lyricsFontSize: 34, syncMode: 'word' })}
+                      style={{ padding: '4px 8px', fontSize: '9px', fontWeight: '700', borderRadius: '12px' }}
+                    >
+                      🐌 Ultra Slow (0.50x / 0ms)
+                    </button>
+
+                    {presetProfiles.map((p) => (
+                      <div 
+                        key={p.id}
+                        onClick={() => handleLoadPreset(p)}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          padding: '4px 8px',
+                          fontSize: '9px',
+                          fontWeight: '700',
+                          background: 'rgba(255, 203, 154, 0.15)',
+                          border: '1px solid rgba(255, 203, 154, 0.4)',
+                          borderRadius: '12px',
+                          color: '#FFCB9A',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>💾 {p.name}</span>
+                        <X 
+                          size={10} 
+                          onClick={(e) => handleDeletePreset(p.id, e)} 
+                          style={{ cursor: 'pointer', opacity: 0.7 }} 
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Save current settings form */}
+                  <form onSubmit={handleSavePreset} style={{ display: 'flex', gap: '6px', marginTop: '4px' }}>
+                    <input 
+                      type="text" 
+                      placeholder="Name your current preset..." 
+                      value={newPresetName}
+                      onChange={(e) => setNewPresetName(e.target.value)}
+                      className="form-control"
+                      style={{ padding: '4px 8px', fontSize: '10px', borderRadius: '6px', flexGrow: 1 }}
+                    />
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary"
+                      style={{ padding: '4px 10px', fontSize: '10px', fontWeight: '700', background: 'var(--accent-gradient)', border: 'none', whiteSpace: 'nowrap' }}
+                      disabled={!newPresetName.trim()}
+                    >
+                      <Save size={11} style={{ marginRight: '2px' }} /> Save
+                    </button>
+                  </form>
                 </div>
 
               </div>

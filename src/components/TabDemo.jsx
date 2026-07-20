@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, ArrowLeft } from 'lucide-react';
+import { playUiSound } from '../utils/soundEngine';
 
 export default function TabDemo({
   currentTrack,
@@ -430,7 +431,7 @@ export default function TabDemo({
                   <button 
                     className="btn btn-primary"
                     style={{ padding: '6px 12px', fontSize: '11px', background: 'var(--accent-gradient)', fontWeight: '700' }}
-                    onClick={handleAttachYtInDemo}
+                    onClick={() => { playUiSound('click'); handleAttachYtInDemo(); }}
                   >
                     Attach
                   </button>
@@ -440,7 +441,11 @@ export default function TabDemo({
               <div style={{ textAlign: 'center', fontSize: '10px', color: 'var(--text-sub)', fontWeight: '700' }}>— OR —</div>
 
               {/* Local File Input */}
-              <label className="btn btn-secondary" style={{ width: '100%', padding: '8px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer', border: '1px solid #D1E8E2', color: '#D1E8E2' }}>
+              <label 
+                className="btn btn-secondary" 
+                style={{ width: '100%', padding: '8px', fontSize: '11px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', cursor: 'pointer', border: '1px solid #D1E8E2', color: '#D1E8E2' }}
+                onClick={() => playUiSound('click')}
+              >
                 <span>📁 Upload Local Audio File</span>
                 <input 
                   type="file" 
@@ -522,7 +527,7 @@ export default function TabDemo({
               fontSize: '13px',
               marginBottom: '20px'
             }} 
-            onClick={() => onBackToEdit(currentTime)}
+            onClick={() => { playUiSound('modal'); onBackToEdit(currentTime); }}
           >
             <ArrowLeft size={16} />
             <span>Edit Synced Lyrics</span>

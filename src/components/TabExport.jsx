@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Copy, Download, FileText, CheckCircle, ListRestart, Globe, ExternalLink } from 'lucide-react';
 import { formatSyncDataToLrc } from '../utils/lrcParser';
+import { playUiSound } from '../utils/soundEngine';
 
 export default function TabExport({
   currentTrack,
@@ -18,6 +19,7 @@ export default function TabExport({
   const hasWordTimestamps = syncData.some(line => line.words && line.words.some(w => w.time !== null && w.time !== -1));
 
   const handlePublishLrclib = () => {
+    playUiSound('modal');
     const track = currentTrack?.title || '';
     const artist = currentTrack?.artist || '';
     const url = `https://lrclib.net/publish?track_name=${encodeURIComponent(track)}&artist_name=${encodeURIComponent(artist)}`;
@@ -61,6 +63,7 @@ export default function TabExport({
 
   // Copy specific mode
   const handleCopySpecific = (granularity) => {
+    playUiSound('modal');
     const text = getContentForMode(granularity, exportFormat);
     navigator.clipboard.writeText(text).then(() => {
       if (granularity === 'line') {
@@ -75,6 +78,7 @@ export default function TabExport({
 
   // Download specific mode
   const handleDownloadSpecific = (granularity) => {
+    playUiSound('modal');
     const text = getContentForMode(granularity, exportFormat);
     const fileExtension = exportFormat === 'lrc' ? 'lrc' : 'json';
     const cleanTitle = (currentTrack?.title || 'synced-lyrics')

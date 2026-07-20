@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Search, Music, AlignLeft, Sparkles, FileText, CheckCircle, Upload, Globe, Eye, ArrowRight, X } from 'lucide-react';
 import { parseLrcText } from '../utils/lrcParser';
+import { playUiSound } from '../utils/soundEngine';
 
 const YoutubeIcon = (props) => (
   <svg 
@@ -91,6 +92,33 @@ export default function TabSearch({
     return (match && match[2].length === 11) ? match[2] : null;
   };
 
+  // Clean & split YouTube titles into Song Title and Artist Name
+  const parseYtTitle = (rawTitle, authorName) => {
+    if (!rawTitle) return { title: 'Unknown Title', artist: authorName || 'Unknown Artist' };
+    
+    let cleaned = rawTitle
+      .replace(/\s*[\(\[](Official\s+(Audio|Video|Music\s+Video|Visualizer|Lyric\s+Video|Lyrics)|Lyric\s+Video|Lyrics|Visualizer|HD|4K|Audio)[\)\]]/gi, '')
+      .replace(/- Topic$/i, '')
+      .trim();
+
+    const separators = [' - ', ' – ', ' — ', ' : '];
+    for (const sep of separators) {
+      if (cleaned.includes(sep)) {
+        const parts = cleaned.split(sep);
+        if (parts.length >= 2) {
+          let artist = parts[0].trim();
+          let title = parts.slice(1).join(sep).trim();
+          return { title, artist };
+        }
+      }
+    }
+
+    return {
+      title: cleaned,
+      artist: authorName ? authorName.replace(/- Topic$/i, '').trim() : 'Unknown Artist'
+    };
+  };
+
   // Handle pasted YouTube Link
   const handleLoadYtUrl = async (e) => {
     e.preventDefault();
@@ -105,6 +133,8 @@ export default function TabSearch({
     
     let infoFetched = false;
     let attempts = 0;
+    let fetchedTitle = '';
+    let fetchedAuthor = '';
     
     while (attempts < INVIDIOUS_INSTANCES.length && !infoFetched) {
       const idx = (activeInvidiousIdx + attempts) % INVIDIOUS_INSTANCES.length;
@@ -113,15 +143,8 @@ export default function TabSearch({
         const res = await fetch(`${instance}/api/v1/videos/${videoId}`);
         if (res.ok) {
           const data = await res.json();
-          onSelectTrack({
-            title: data.title,
-            artist: data.author || 'Unknown Artist',
-            duration: data.lengthSeconds || 0,
-            thumbnail: data.videoThumbnails?.[0]?.url || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-            audioUrl: null,
-            source: 'youtube',
-            videoId: videoId
-          });
+          fetchedTitle = data.title;
+          fetchedAuthor = data.author;
           setActiveInvidiousIdx(idx);
           infoFetched = true;
         }
@@ -131,11 +154,33 @@ export default function TabSearch({
       attempts++;
     }
 
+    // Try noembed CORS fallback if Invidious rate limits
     if (!infoFetched) {
-      setShowCustomDetailsForm(true);
-    } else {
-      setYtUrlInput('');
+      try {
+        const noembedRes = await fetch(`https://noembed.com/embed?url=https://www.youtube.com/watch?v=${videoId}`);
+        if (noembedRes.ok) {
+          const noembedData = await noembedRes.json();
+          if (noembedData && noembedData.title) {
+            fetchedTitle = noembedData.title;
+            fetchedAuthor = noembedData.author_name;
+            infoFetched = true;
+          }
+        }
+      } catch (err) {
+        console.warn("Noembed oEmbed fetch failed:", err);
+      }
     }
+
+    if (infoFetched && fetchedTitle) {
+      const parsed = parseYtTitle(fetchedTitle, fetchedAuthor);
+      setCustomTitle(parsed.title);
+      setCustomArtist(parsed.artist);
+    } else {
+      setCustomTitle('');
+      setCustomArtist('');
+    }
+
+    setShowCustomDetailsForm(true);
     setSearchAudioLoading(false);
   };
 
@@ -239,7 +284,7 @@ export default function TabSearch({
     }
   }, [currentTrack]);
 
-  // Search LRCLIB for lyrics
+  // Search LRCLIB for lyrics (supports "+" operator for title + artist)
   const handleLyricsSearch = async (e) => {
     if (e) e.preventDefault();
     if (!lyricsQuery.trim()) return;
@@ -247,16 +292,29 @@ export default function TabSearch({
     setSearchLyricsLoading(true);
     setLyricsResults([]);
 
+    let searchTrack = lyricsQuery.trim();
+    let searchArtist = '';
+
+    if (lyricsQuery.includes('+')) {
+      const parts = lyricsQuery.split('+');
+      searchTrack = parts[0].trim();
+      searchArtist = parts[1] ? parts[1].trim() : '';
+    }
+
     try {
-      let res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(lyricsQuery.trim())}`);
+      let url = searchArtist
+        ? `https://lrclib.net/api/search?track_name=${encodeURIComponent(searchTrack)}&artist_name=${encodeURIComponent(searchArtist)}`
+        : `https://lrclib.net/api/search?q=${encodeURIComponent(searchTrack)}`;
+
+      let res = await fetch(url);
       let data = [];
       if (res.ok) {
         data = await res.json();
       }
       
-      // Fallback query parameter if 'q' search is empty
-      if (!Array.isArray(data) || data.length === 0) {
-        res = await fetch(`https://lrclib.net/api/search?track_name=${encodeURIComponent(lyricsQuery.trim())}`);
+      // Fallback general search if specific track+artist yielded no results
+      if ((!Array.isArray(data) || data.length === 0) && searchArtist) {
+        res = await fetch(`https://lrclib.net/api/search?q=${encodeURIComponent(searchTrack + ' ' + searchArtist)}`);
         if (res.ok) {
           data = await res.json();
         }
@@ -358,7 +416,7 @@ export default function TabSearch({
             <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '20px', overflow: 'hidden', padding: '2px', background: 'rgba(0,0,0,0.2)' }}>
               <button 
                 className={`btn ${audioTab === 'local' ? 'active-pill' : ''}`}
-                onClick={() => setAudioTab('local')}
+                onClick={() => { playUiSound('click'); setAudioTab('local'); }}
                 style={{
                   borderRadius: '16px',
                   padding: '4px 12px',
@@ -373,7 +431,7 @@ export default function TabSearch({
               </button>
               <button 
                 className={`btn ${audioTab === 'online' ? 'active-pill' : ''}`}
-                onClick={() => setAudioTab('online')}
+                onClick={() => { playUiSound('click'); setAudioTab('online'); }}
                 style={{
                   borderRadius: '16px',
                   padding: '4px 12px',
@@ -495,7 +553,7 @@ export default function TabSearch({
                       style={{ padding: '6px 10px', fontSize: '11px', borderRadius: '8px' }}
                     />
                   </div>
-                  <button type="submit" className="btn btn-primary" style={{ padding: '6px', fontSize: '11px', background: 'var(--accent-gradient)' }}>Load Track</button>
+                  <button type="submit" className="btn btn-primary" onClick={() => playUiSound('modal')} style={{ padding: '6px', fontSize: '11px', background: 'var(--accent-gradient)' }}>Load Track</button>
                 </form>
               )}
 
@@ -568,13 +626,13 @@ export default function TabSearch({
           
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', borderBottom: '1px solid var(--border-light)', paddingBottom: '12px', width: '100%' }}>
             <h3 style={{ fontSize: '15px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', justifyContent: 'center' }}>
-              <AlignLeft size={18} style={{ color: '#116466' }} /> Lyrics Workspace
+              <AlignLeft size={18} style={{ color: '#116466' }} /> Lyrics
             </h3>
             {/* Pill Tabs for Lyrics */}
             <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '20px', overflow: 'hidden', padding: '2px', background: 'rgba(0,0,0,0.2)' }}>
               <button 
                 className={`btn ${lyricsTab === 'import' ? 'active-pill' : ''}`}
-                onClick={() => setLyricsTab('import')}
+                onClick={() => { playUiSound('click'); setLyricsTab('import'); }}
                 style={{
                   borderRadius: '16px',
                   padding: '4px 12px',
@@ -589,7 +647,7 @@ export default function TabSearch({
               </button>
               <button 
                 className={`btn ${lyricsTab === 'editor' ? 'active-pill' : ''}`}
-                onClick={() => setLyricsTab('editor')}
+                onClick={() => { playUiSound('click'); setLyricsTab('editor'); }}
                 style={{
                   borderRadius: '16px',
                   padding: '4px 12px',
@@ -613,12 +671,15 @@ export default function TabSearch({
                   <PixelNote size={32} color="#D9B08C" />
                 </div>
                 <form onSubmit={handleLyricsSearch} className="form-group" style={{ marginBottom: '0', flexGrow: 1 }}>
-                  <label htmlFor="lyrics-search-input" style={{ fontSize: '10px', color: 'var(--text-sub)', fontWeight: '700', display: 'block', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search lyrics from the internet</label>
+                  <div className="flex-between" style={{ marginBottom: '4px' }}>
+                    <label htmlFor="lyrics-search-input" style={{ fontSize: '10px', color: 'var(--text-sub)', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Search lyrics from the internet</label>
+                    <span style={{ fontSize: '9px', color: '#FFCB9A' }}>Tip: Use "+" for Artist (e.g. Cry For Me + The Weeknd)</span>
+                  </div>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <input 
                       id="lyrics-search-input"
                       type="text" 
-                      placeholder="Enter song title or artist..." 
+                      placeholder="e.g. Cry For Me + The Weeknd or Song title..." 
                       value={lyricsQuery}
                       onChange={(e) => setLyricsQuery(e.target.value)}
                       className="form-control"
@@ -743,6 +804,7 @@ export default function TabSearch({
                   type="button" 
                   className="btn btn-secondary" 
                   onClick={() => {
+                    playUiSound('modal');
                     const cleaned = pastedLyrics
                       .split('\n')
                       .filter(line => !line.trim().startsWith('[') && !line.trim().endsWith(']'))
@@ -758,16 +820,27 @@ export default function TabSearch({
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flexGrow: 1, justifyContent: 'flex-end' }}>
                   <button 
                     type="button" 
-                    className="btn btn-secondary" 
-                    onClick={handleSaveLyrics}
-                    style={{ fontSize: '11px', padding: '6px 12px', flex: '1 1 auto' }}
+                    className="btn" 
+                    onClick={() => { playUiSound('modal'); handleSaveLyrics(); }}
+                    style={{ 
+                      fontSize: '11px', 
+                      padding: '6px 14px', 
+                      flex: '1 1 auto', 
+                      background: 'linear-gradient(135deg, #FFCB9A 0%, #D1E8E2 100%)', 
+                      color: '#1C2321', 
+                      borderRadius: '16px', 
+                      fontWeight: '800',
+                      boxShadow: '0 2px 10px rgba(255, 203, 154, 0.4)',
+                      border: 'none'
+                    }}
                   >
-                    Apply
+                    Edit or Add LRC
                   </button>
                   <button 
                     type="button" 
                     className="btn btn-secondary" 
                     onClick={() => {
+                      playUiSound('modal');
                       handleSaveLyrics();
                       if (onProceedToRetimer) {
                         onProceedToRetimer();
@@ -784,6 +857,7 @@ export default function TabSearch({
                     type="button" 
                     className="btn btn-primary" 
                     onClick={() => {
+                      playUiSound('modal');
                       handleSaveLyrics();
                       if (currentTrack && pastedLyrics.trim()) {
                         onNextTab();

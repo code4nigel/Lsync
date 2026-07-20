@@ -6,6 +6,7 @@ import TabExport from './components/TabExport';
 import TabSettings from './components/TabSettings';
 import BackgroundController from './components/BackgroundController';
 import { Search, Sliders, Download, Play, Settings } from 'lucide-react';
+import { playUiSound, getUiVolume, setUiVolume } from './utils/soundEngine';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('search'); // 'search', 'sync', 'demo', 'export', 'settings'
@@ -13,6 +14,14 @@ export default function App() {
   const [currentLyrics, setCurrentLyrics] = useState('');
   const [syncData, setSyncData] = useState([]);
   const [syncMode, setSyncMode] = useState('word'); // 'word' or 'line'
+
+  // Sound Volume State
+  const [uiVolume, setUiVolumeState] = useState(() => getUiVolume());
+
+  const handleVolumeChange = (newVol) => {
+    setUiVolumeState(newVol);
+    setUiVolume(newVol);
+  };
 
   // Hoisted Settings States (accessible globally)
   const [uiScale, setUiScale] = useState(() => {
@@ -207,6 +216,8 @@ export default function App() {
               onChangeGlobalFontSize={setGlobalFontSize}
               lyricsFontSize={lyricsFontSize}
               onChangeLyricsFontSize={setLyricsFontSize}
+              uiVolume={uiVolume}
+              onChangeUiVolume={handleVolumeChange}
             />
           )}
 
@@ -234,7 +245,7 @@ export default function App() {
           <button 
             className={`tab-btn ${activeTab === 'search' ? 'active' : ''}`} 
             data-target="search"
-            onClick={() => setActiveTab('search')}
+            onClick={() => { playUiSound('dock'); setActiveTab('search'); }}
           >
             <Search size={13} /> Search
           </button>
@@ -243,6 +254,7 @@ export default function App() {
             className={`tab-btn ${activeTab === 'sync' ? 'active' : ''}`} 
             data-target="sync"
             onClick={() => {
+              playUiSound('dock');
               if (!currentTrack || !currentLyrics) {
                 if (!hasWarned) {
                   alert("Notice: You haven't loaded an audio track and lyrics yet! The timeline workspace will be empty. Click again to proceed anyway.");
@@ -260,6 +272,7 @@ export default function App() {
             className={`tab-btn ${activeTab === 'demo' ? 'active' : ''}`} 
             data-target="demo"
             onClick={() => {
+              playUiSound('dock');
               const hasSync = syncData.length > 0 && syncData.some(line => line.time !== null);
               if (!hasSync) {
                 if (!hasWarned) {
@@ -278,6 +291,7 @@ export default function App() {
             className={`tab-btn ${activeTab === 'export' ? 'active' : ''}`} 
             data-target="export"
             onClick={() => {
+              playUiSound('dock');
               const hasSync = syncData.length > 0 && syncData.some(line => line.time !== null);
               if (!hasSync) {
                 if (!hasWarned) {
@@ -295,7 +309,7 @@ export default function App() {
           <button 
             className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`} 
             data-target="settings"
-            onClick={() => setActiveTab('settings')}
+            onClick={() => { playUiSound('dock'); setActiveTab('settings'); }}
           >
             <Settings size={13} /> Theme
           </button>

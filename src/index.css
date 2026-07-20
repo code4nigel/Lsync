@@ -123,24 +123,43 @@ body::after {
     border: none !important;
     box-shadow: none !important;
     overflow-x: hidden !important;
+    box-sizing: border-box !important;
   }
   .app-body, .app-content {
-    padding: 10px 10px 90px 10px !important;
+    padding: 12px 12px 90px 12px !important;
     zoom: 1 !important; /* Reset desktop 1.1x zoom multiplier on mobile */
     overflow-x: hidden !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .tab-pane {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+    margin: 0 !important;
   }
   .app-header {
     height: auto;
     padding: 10px 14px;
+    box-sizing: border-box !important;
   }
   .grid-2 {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
   }
   .glass-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     height: auto !important;
     max-height: none !important;
     padding: 14px !important;
+    margin: 0 !important;
+    overflow: hidden !important;
   }
   .floating-dock {
     bottom: 8px !important;

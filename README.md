@@ -1,107 +1,107 @@
-# 🎵 Lsync — Modern Synchronized Lyrics Editor & Builder
+# 🎵 Lsync — Synchronized Lyrics Editor
 
-> **Lsync** is a state-of-the-art, ultra-fast web application designed for music lovers, lyricists, karaoke creators, and audio editors to build, edit, retime, and export line-by-line (`.lrc`), word-by-word (`eLRC`), text (`.txt`), and Word document (`.doc`) synchronized lyrics.
+> **Lsync** is a web application for creating, editing, retiming, and exporting line-by-line (`.lrc`) and word-by-word (`eLRC`) synchronized lyrics.
 
 ---
 
 ### 🌐 Live Web Access
 
-Anyone on the web can access and use Lsync directly from their browser:  
+Access Lsync directly in your browser:  
 👉 **[https://code4nigel.github.io/Lsync/](https://code4nigel.github.io/Lsync/)**
 
 ---
 
-### 🖥️ 📱 Visual Tour & Interfaces (Desktop & Mobile)
+### 🖥️ 📱 Interfaces (Desktop & Mobile)
 
-Lsync features custom-crafted user interfaces designed for both **Desktop 💻** and **Mobile 📱** viewports, complete with a PUBG/BGMI-style ergonomic floating mobile controller dock.
+Lsync provides optimized layouts for both **Desktop** and **Mobile** viewports.
 
-#### 1. 🔍 Search & Import Lyrics Tab
-Search lyrics online via open databases (LRCLIB), import YouTube / YouTube Music links with automatic title/artist parsing and `⇄ Swap` tool, or clean existing LRC tags with `🧹 Clean Timestamps & Tags`.
+#### 1. 🔍 Search & Import Lyrics
+Search lyrics online via LRCLIB, import YouTube / YouTube Music links with automatic title & artist extraction, or clean LRC tags into plain text.
 
-| Desktop View 💻 | Mobile View 📱 |
+| Desktop View | Mobile View |
 | :---: | :---: |
 | ![Search Page Desktop](Images/Demonstartions/SS_search_page.png) | ![Search Page Mobile](Images/Demonstartions/ss_search_tab.jpg) |
 
 ---
 
-#### 2. ⚡ Real-Time Word & Line Synchronization Tab
-Sync lyrics at 60 FPS with live audio playback, liquid glass visualizer, latency offset compensation, playback speed controls, and 1-tap thumb controls.
+#### 2. ⚡ Word & Line Synchronization
+Sync lyrics with live audio playback, visualizers, latency compensation, and shortcut controls.
 
-| Desktop View 💻 | Mobile View 📱 |
+| Desktop View | Mobile View |
 | :---: | :---: |
 | ![Sync Tab Desktop](Images/Demonstartions/SS_sync.png) | ![Sync Tab Mobile](Images/Demonstartions/ss_sync_tab.jpg) |
 
 ---
 
-#### 3. ⏱️ Retimer & Precision Time Shift Tool
-Shift entire song timings forward or backward by custom milliseconds or seconds with live side-by-side demo testing.
+#### 3. ⏱️ Retimer & Time Shift Tool
+Shift timestamps forward or backward by custom milliseconds or seconds with live side-by-side testing.
 
-| Retimer & Time Shift Tool ⏱️ |
+| Retimer & Time Shift Tool |
 | :---: |
 | ![Retimer Tool Desktop](Images/Demonstartions/SS_reshink_timer.png) |
 
 ---
 
-#### 4. 🎤 Live Demo Karaoke Player Tab
-Preview synced lyrics in real-time with smooth karaoke highlight animations and video/audio background sync.
+#### 4. 🎤 Demo Karaoke Player
+Preview synced lyrics in real-time with smooth karaoke highlight animations.
 
-| Desktop View 💻 | Mobile View 📱 |
+| Desktop View | Mobile View |
 | :---: | :---: |
 | ![Demo Tab Desktop](Images/Demonstartions/SS_demo_page.png) | ![Demo Tab Mobile](Images/Demonstartions/ss_demo_tab.jpg) |
 
 ---
 
-#### 5. 📄 Export & Format Generator Tab
-Export and download synchronized lyrics in standard **Line-by-Line (LbL)** `[mm:ss.xx]`, enhanced **Word-by-Word (WbW)** `<mm:ss.xx>`, plain text `.txt`, and Word `.doc` formats.
+#### 5. 📄 Export & Format Generator
+Export synchronized lyrics in Line-by-Line (LbL), Word-by-Word (WbW), plain text `.txt`, and `.doc` formats.
 
-| Desktop View 💻 | Mobile View 📱 |
+| Desktop View | Mobile View |
 | :---: | :---: |
 | ![Export Tab Desktop](Images/Demonstartions/SS_export.png) | ![Export Tab Mobile](Images/Demonstartions/ss_export_tab.jpg) |
 
 ---
 
-#### 6. 🎨 Personalization & Themes Tab
-Customize UI scale, workspace font size, audio volume, and liquid glass background visualizers (Waves, Stars, Nebula, Grid).
+#### 6. 🎨 Personalization & Themes
+Customize UI scale, font sizes, audio volume, and background themes.
 
-| Desktop View 💻 | Mobile View 📱 |
+| Desktop View | Mobile View |
 | :---: | :---: |
 | ![Theme Tab Desktop](Images/Demonstartions/SS_theme_page.png) | ![Theme Tab Mobile](Images/Demonstartions/ss_theme.jpg) |
 
 ---
 
-### ✨ Key Features & Enhancements
+### ✨ Features
 
-- **⚡ 60 FPS Audio Visualizer:** Liquid glass canvas rendering reacting to live audio playback.
-- **📱 Ergonomic Floating Mobile Controller Dock:** PUBG/BGMI-style bottom floating HUD for 2-thumb mobile syncing (`PLAY`, `BREAK [M]`, `UNDO [Z]`, `STAMP [S]`, `END [E]`, `SKIP [D]`, `🔁 LOOP`, `⚙️ OPTIONS`).
-- **🎵 YouTube Title Auto-Fill & `⇄ Swap` Button:** Automatically extracts song title & artist name from YouTube / YTM URLs with quick swap capability.
-- **🧹 Clean Timestamps & Tags:** Converts raw synced LRC files into clean plain text lines with 1 click.
-- **⏱️ Retimer & Time Shift Mode:** Precision millisecond & second time-shifting across entire tracks or selected line sections.
-- **🎛️ Latency & Speed Controls with Reset Buttons:** Adjust latency offset (default -100ms) and playback speed (0.4x to 1.0x) with instant reset buttons.
-- **📏 Lyrics Font Size Slider:** Change lyrics workspace font size (default 22px on mobile, 28px on desktop) directly inside Sync Options or Theme tab.
-- **📄 Multi-Format Exporter:**
-  - **LRC (`.lrc`)** — Standard Line-by-Line & Enhanced Word-by-Word.
-  - **JSON (`.json`)** — Structured word & line timing metadata.
-  - **Text (`.txt`)** — Plain text, LbL timed text, and WbW tagged text.
-  - **Word Document (`.doc`)** — Formatted Microsoft Word & Google Docs exports.
-- **⌨️ 1-Key Hotkey Workflow:**
+- **Audio Visualizer:** Canvas visualizer reacting to audio playback.
+- **Mobile Controller Dock:** Floating controls designed for touch screens (`PLAY`, `BREAK [M]`, `UNDO [Z]`, `STAMP [S]`, `END [E]`, `SKIP [D]`, `LOOP`, `OPTIONS`).
+- **YouTube Title Auto-Fill & Swap:** Automatically extracts song title & artist from YouTube / YTM URLs with a quick-swap option.
+- **Clean Timestamps & Tags:** Converts synced LRC files into clean plain text lines.
+- **Retimer & Time Shift:** Shift timestamps forward or backward across entire tracks or selected sections.
+- **Latency & Playback Speed Controls:** Adjust latency compensation and playback speed.
+- **Lyrics Font Size Control:** Adjust workspace font size directly in Sync Options or Theme settings.
+- **Multi-Format Exporter:**
+  - **LRC (`.lrc`)** — Line-by-Line & Word-by-Word
+  - **JSON (`.json`)** — Timing metadata
+  - **Text (`.txt`)** — Plain text, LbL timed text, and WbW tagged text
+  - **Word Document (`.doc`)** — Formatted document export
+- **Keyboard Shortcuts:**
   - `SPACE` — Play / Pause audio
-  - `S` or `ENTER` — Stamp line / word timestamp
+  - `S` or `ENTER` — Stamp timestamp
   - `Z` or `BACKSPACE` — Undo last timestamp
-  - `M` — Insert instrumental music break `[mm:ss.xx] ♪`
-  - `E` — Mark end of line timestamp
+  - `M` — Insert music break `[mm:ss.xx] ♪`
+  - `E` — Mark end of line
   - `D` — Skip current line
   - `A` / `B` — Set loop range markers
 
 ---
 
-### 🌐 Connected Data Sources & References
+### 🌐 Data Sources & References
 
 | Provider / Engine | Description | Reference Link |
 | :--- | :--- | :--- |
-| **LRCLIB Database** | Open-source global database for plain and synced LRC lyrics | [lrclib.net](https://lrclib.net) |
-| **YouTube / Invidious / Piped** | Decentralized video streaming nodes & audio playback | [invidious.io](https://invidious.io) |
-| **Web Audio API Engine** | High-fidelity local browser audio engine (`.mp3`, `.flac`, `.wav`, `.m4a`) | Web Audio API |
-| **eLRC Engine** | Native parser & builder for line and word timestamps | Enhanced LRC Spec |
+| **LRCLIB Database** | Open database for plain and synced LRC lyrics | [lrclib.net](https://lrclib.net) |
+| **YouTube / Invidious / Piped** | Video streaming nodes & audio playback | [invidious.io](https://invidious.io) |
+| **Web Audio API Engine** | Browser audio engine (`.mp3`, `.flac`, `.wav`, `.m4a`) | Web Audio API |
+| **eLRC Engine** | Parser for line and word timestamps | Enhanced LRC Spec |
 
 ---
 

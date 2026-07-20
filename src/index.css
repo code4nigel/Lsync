@@ -160,7 +160,11 @@ body::after {
     max-height: none !important;
     padding: 14px !important;
     margin: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
+  }
+  .export-preview-textarea {
+    min-height: 280px !important;
+    height: 320px !important;
   }
   .sync-controller-bar {
     position: fixed !important;

@@ -932,7 +932,7 @@ export default function TabSync({
       <div className="grid-2" style={{ gridTemplateColumns: '1fr 340px', gap: '20px' }}>
         
         {/* Left Column: Sync Timeline Workspace */}
-        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '560px' }}>
+        <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '16px', minHeight: '560px' }}>
           
           {/* Sub-tab selection bar */}
           <div className="flex-between" style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '10px' }}>

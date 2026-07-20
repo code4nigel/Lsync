@@ -162,17 +162,21 @@ body::after {
     overflow: hidden !important;
   }
   .sync-controller-bar {
-    position: sticky !important;
-    bottom: 0px !important;
-    z-index: 90 !important;
-    background: rgba(17, 30, 28, 0.95) !important;
-    backdrop-filter: blur(14px) saturate(140%) !important;
-    -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
-    padding: 10px 8px !important;
-    border-top: 1px solid rgba(209, 232, 226, 0.25) !important;
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.6) !important;
-    border-radius: 12px 12px 0 0 !important;
-    margin-top: auto !important;
+    position: fixed !important;
+    bottom: 58px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 94vw !important;
+    max-width: 500px !important;
+    z-index: 9999 !important;
+    background: rgba(17, 35, 32, 0.95) !important;
+    backdrop-filter: blur(18px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(18px) saturate(160%) !important;
+    padding: 8px 10px !important;
+    border: 1px solid rgba(209, 232, 226, 0.3) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
+    border-radius: 16px !important;
+    box-sizing: border-box !important;
   }
   .floating-dock {
     bottom: 8px !important;

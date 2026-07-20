@@ -115,28 +115,65 @@ export default function TabExport({
               <FileText size={18} style={{ color: 'var(--accent-purple)' }} /> Generated Export Code
             </h3>
             
-            {/* Format Selector Pills */}
-            <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '20px', overflow: 'hidden', padding: '2px', background: 'rgba(0,0,0,0.2)' }}>
-              {['lrc', 'json', 'txt', 'doc'].map((fmt) => (
-                <button 
-                  key={fmt}
-                  className="btn" 
-                  onClick={() => { playUiSound('click'); setExportFormat(fmt); }}
-                  style={{ 
-                    borderRadius: '16px',
-                    padding: '3px 10px',
-                    fontSize: '10px',
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    background: exportFormat === fmt ? 'var(--accent-gradient)' : 'transparent',
-                    color: '#fff',
-                    border: 'none',
-                    boxShadow: exportFormat === fmt ? '0 2px 8px var(--accent-glow)' : 'none'
-                  }}
-                >
-                  {fmt === 'doc' ? 'DOCS' : fmt}
-                </button>
-              ))}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {(exportFormat === 'lrc' || exportFormat === 'json') && (
+                <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '16px', overflow: 'hidden', padding: '1px', background: 'rgba(0,0,0,0.2)' }}>
+                  <button 
+                    className="btn" 
+                    onClick={() => { playUiSound('click'); setSelectedGranularity('line'); }}
+                    style={{ 
+                      borderRadius: '14px',
+                      padding: '2px 8px',
+                      fontSize: '9px',
+                      fontWeight: '700',
+                      background: selectedGranularity === 'line' ? 'var(--accent-gradient)' : 'transparent',
+                      color: '#fff',
+                      border: 'none'
+                    }}
+                  >
+                    LbL
+                  </button>
+                  <button 
+                    className="btn" 
+                    onClick={() => { playUiSound('click'); setSelectedGranularity('word'); }}
+                    style={{ 
+                      borderRadius: '14px',
+                      padding: '2px 8px',
+                      fontSize: '9px',
+                      fontWeight: '700',
+                      background: selectedGranularity === 'word' ? 'var(--accent-gradient)' : 'transparent',
+                      color: '#fff',
+                      border: 'none'
+                    }}
+                  >
+                    WbW
+                  </button>
+                </div>
+              )}
+
+              {/* Format Selector Pills */}
+              <div style={{ display: 'flex', border: '1px solid var(--border-light)', borderRadius: '20px', overflow: 'hidden', padding: '2px', background: 'rgba(0,0,0,0.2)' }}>
+                {['lrc', 'json', 'txt', 'doc'].map((fmt) => (
+                  <button 
+                    key={fmt}
+                    className="btn" 
+                    onClick={() => { playUiSound('click'); setExportFormat(fmt); }}
+                    style={{ 
+                      borderRadius: '16px',
+                      padding: '3px 10px',
+                      fontSize: '10px',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      background: exportFormat === fmt ? 'var(--accent-gradient)' : 'transparent',
+                      color: '#fff',
+                      border: 'none',
+                      boxShadow: exportFormat === fmt ? '0 2px 8px var(--accent-glow)' : 'none'
+                    }}
+                  >
+                    {fmt === 'doc' ? 'DOCS' : fmt}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

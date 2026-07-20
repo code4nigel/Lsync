@@ -140,18 +140,26 @@ export const formatSyncDataToLrc = (syncData, currentTrack = null, options = { i
     }
 
     // 2. Lyric line
-    if (line.time !== null && line.time !== -1) {
-      const formattedTime = formatLrcTime(line.time);
+    let effectiveLineTime = line.time;
+    if ((effectiveLineTime === null || effectiveLineTime === -1) && line.words && line.words.length > 0) {
+      const firstWordWithTime = line.words.find(w => w.time !== null && w.time !== -1);
+      if (firstWordWithTime) {
+        effectiveLineTime = firstWordWithTime.time;
+      }
+    }
+
+    if (effectiveLineTime !== null && effectiveLineTime !== -1) {
+      const formattedTime = formatLrcTime(effectiveLineTime);
       if (formattedTime) {
         if (line.text.trim() === '♪') {
           lrcLines.push({
-            time: line.time,
+            time: effectiveLineTime,
             text: `[${formattedTime}] ♪`
           });
         } else {
           const hasWordTimestamps = line.words && line.words.some(w => w.time !== null && w.time !== -1);
           
-          if (options.syncMode === 'word' || hasWordTimestamps) {
+          if (options.syncMode === 'word' && hasWordTimestamps) {
             const wordStr = line.words.map(w => {
               const wTimeFormatted = formatLrcTime(w.time);
               if (wTimeFormatted) {
@@ -161,12 +169,12 @@ export const formatSyncDataToLrc = (syncData, currentTrack = null, options = { i
             }).join(' ');
 
             lrcLines.push({
-              time: line.time,
+              time: effectiveLineTime,
               text: `[${formattedTime}] ${wordStr}`
             });
           } else {
             lrcLines.push({
-              time: line.time,
+              time: effectiveLineTime,
               text: `[${formattedTime}] ${line.text}`
             });
           }
